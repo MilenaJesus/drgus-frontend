@@ -1,0 +1,126 @@
+/* src/componentes/Topo.css */
+
+/* Estilos originais do Cabeçalho */
+.app-header-common {
+    background-color: #FFFFFF;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.page-title {
+    font-size: 20px;
+    color: #000000;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* --- ESTILOS DE NOTIFICAÇÕES (COM BADGE CENTRALIZADO) --- */
+
+/* Container para o botão/ícone e o dropdown */
+.notification-icon-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+/* Botão que contém o ícone do sino */
+.notification-icon-button {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    position: relative; /* Contexto para o badge */
+    display: inline-block;
+    line-height: 0;
+}
+.notification-icon-button i {
+     font-size: 24px;
+     color: #333;
+     padding: 5px;
+     display: block;
+     transition: color 0.2s;
+}
+.notification-icon-button:hover i {
+    color: #007AFF;
+}
+
+/* Badge (indicador vermelho - ALINHAMENTO CORRIGIDO) */
+.notification-badge {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    background-color: red;
+    color: white;
+    border-radius: 50%;
+    font-size: 10px;
+    font-weight: bold;
+    min-width: 16px;
+    height: 16px;
+    box-sizing: border-box;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* --- AJUSTES DE ALINHAMENTO VERTICAL --- */
+    /* padding-bottom: 1px; */ /* REMOVIDO */
+    line-height: 16px; /* Tenta alinhar pela altura */
+    /* padding: 0; */ /* Garante sem padding extra */
+    /* --- FIM DOS AJUSTES --- */
+}
+
+/* O Dropdown (sem alterações aqui) */
+.notification-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    width: 350px;
+    max-width: 90vw;
+    z-index: 1000;
+    border: 1px solid #eee;
+    overflow: hidden;
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.dropdown-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid #eee;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #333;
+}
+.mark-all-read-button {
+    background: none; border: none; color: #007AFF; cursor: pointer;
+    font-size: 0.8rem; padding: 4px;
+}
+.mark-all-read-button:hover { text-decoration: underline; }
+
+/* Lista de Notificações (sem alterações) */
+.notification-list { list-style: none; padding: 0; margin: 0; max-height: 300px; overflow-y: auto; }
+.notification-item { border-bottom: 1px solid #f0f0f0; }
+.notification-item:last-child { border-bottom: none; }
+.notification-item.loading, .notification-item.empty { text-align: center; color: #888; font-style: italic; padding: 20px 16px; }
+.notification-link { display: block; text-decoration: none; color: inherit; padding: 12px 16px; transition: background-color 0.15s ease; }
+.notification-link:hover { background-color: #f8f8f8; }
+.notification-message { font-size: 0.9rem; color: #333; margin: 0 0 4px 0; line-height: 1.4; }
+.notification-time { font-size: 0.75rem; color: #888; }
+
+/* Rodapé do Dropdown (sem alterações) */
+.dropdown-footer { padding: 10px 16px; text-align: center; border-top: 1px solid #eee; background-color: #f8f9fa; }
+.dropdown-footer a { color: #007AFF; text-decoration: none; font-weight: 500; font-size: 0.9rem; }
+.dropdown-footer a:hover { text-decoration: underline; }
+
+/* --- FIM DOS ESTILOS DE NOTIFICAÇÕES --- */

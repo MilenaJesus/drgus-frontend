@@ -1,0 +1,45 @@
+.ajuda-container {
+  padding: 2rem;
+  max-width: 900px; /* Limita a largura do texto para melhor leitura */
+  margin: 0 auto;
+}
+
+.ajuda-container h2 {
+  font-size: 1.7rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 2rem;
+}
+
+.ajuda-section {
+  margin-bottom: 2rem;
+}
+
+.ajuda-section h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #007aff; /* Título da seção em azul */
+  border-bottom: 1px solid #e4e4e4;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.ajuda-section p,
+.ajuda-section li {
+  font-size: 1rem;
+  color: #555;
+  line-height: 1.6;
+}
+
+.ajuda-section ul,
+.ajuda-section ol {
+  padding-left: 20px;
+}
+
+/* Estilo para o placeholder da Agenda */
+.ajuda-placeholder {
+  font-style: italic;
+  color: #888;
+  border-left: 4px solid #e4e4e4;
+  padding-left: 1rem;
+}

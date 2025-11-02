@@ -1,0 +1,400 @@
+.orcamento-container {
+    padding: 1.5rem;
+    background-color: #ffffff;
+    min-height: 100vh;
+}
+
+.orcamento-content-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.top-section-wrapper {
+    display: flex;
+    gap: 1rem;
+    background-color: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e4e4e4;
+}
+
+.odontograma-vis-container {
+    flex: 1.2;
+    display: flex;
+    flex-direction: column;
+}
+
+.procedimento-form-card {
+    flex: 1;
+    border: 1px solid #e4e4e4;
+    padding: 1.5rem;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.orcamento-details-section {
+    background-color: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e4e4e4;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.section-title {
+    font-size: 1.2rem;
+    color: #000000;
+    margin-top: 0;
+    margin-bottom: 0.8rem;
+}
+
+.odontograma-grid {
+    text-align: center;
+}
+
+.arcada-numeros-superior,
+.arcada-numeros-inferior,
+.arcada-superior,
+.arcada-inferior {
+    display: flex;
+    justify-content: center;
+    gap: 0.3rem;
+}
+
+.arcada-numeros-superior {
+    margin-bottom: 0.1rem;
+}
+
+.arcada-numeros-inferior {
+    margin-top: 0.1rem;
+}
+
+.arcada-numeros-superior span,
+.arcada-numeros-inferior span {
+    width: 28px;
+    font-size: 0.65rem;
+    text-align: center;
+    color: #000000;
+}
+
+.dente-box {
+    width: 28px;
+    height: 40px;
+    border: 1px solid #c3c3c3;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s;
+}
+
+.dente-box:hover {
+    background-color: #e0e0e0;
+}
+
+.dente-box.selected {
+    border-color: #007aff;
+    box-shadow: 0 0 5px rgba(0, 122, 255, 0.5);
+    background-color: #e3f2fd;
+}
+
+.dente-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.procedimento-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.dente-label {
+    font-size: 0.9rem;
+    color: #000000;
+    font-weight: bold;
+}
+
+.faces-container {
+    display: flex;
+    gap: 0.8rem;
+    margin-bottom: 1.5rem;
+}
+
+.face-button {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.face-circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid #000000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 4px;
+    transition: all 0.2s;
+}
+
+.face-button .face-icon {
+    color: #000000;
+    font-size: 0.7rem;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.face-button span {
+    font-size: 0.55rem;
+    color: #000000;
+}
+
+.face-button.selected .face-circle {
+    background-color: rgba(0, 122, 255, 0.15);
+    border-color: #007aff;
+}
+
+.face-button.selected .face-icon {
+    color: #007aff;
+    opacity: 1;
+}
+
+.procedimento-inputs.stacked {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.procedimento-inputs .form-group {
+    width: 100%;
+    max-width: 200px;
+}
+
+.form-group label {
+    color: #000000;
+    margin-bottom: 4px;
+    font-size: 0.8rem;
+}
+
+.input-field,
+.select-field {
+    border: 1px solid #e4e4e4;
+    border-radius: 10px;
+    padding: 0.4rem 1.5rem 0.4rem 0.4rem;
+    color: #000000;
+    font-size: 0.85rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.add-button {
+    background-color: rgba(0, 122, 255, 0.15);
+    border: 1px solid #007aff;
+    color: #007aff;
+    border-radius: 10px;
+    padding: 0.6rem 1.2rem;
+    width: 100%;
+    max-width: 200px;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+}
+
+.add-button:hover {
+    background-color: rgba(0, 122, 255, 0.25);
+}
+
+.orcamento-header {
+    margin-bottom: 0;
+}
+
+.orcamento-header h3,
+.tabela-procedimentos-wrapper h4 {
+    font-size: 1.1rem;
+    color: #000000;
+    margin-bottom: 0.2rem;
+}
+
+.form-row-compact {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 0.8rem;
+    padding-left: 0.8rem;
+}
+
+.form-row-compact .form-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.tabela-procedimentos-wrapper {
+    overflow-x: auto;
+    margin-top: 0;
+}
+
+.tabela-procedimentos-wrapper table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tabela-procedimentos-wrapper th,
+.tabela-procedimentos-wrapper td {
+    padding: 0.8rem;
+    border: 1px solid #e4e4e4;
+    text-align: left;
+    font-size: 0.8rem;
+}
+
+.tabela-procedimentos-wrapper th {
+    background-color: #f9f9f9;
+    font-weight: 500;
+    color: #000000;
+}
+
+.remove-button {
+    background: none;
+    border: none;
+    color: #000000;
+    cursor: pointer;
+    font-size: 0.9rem;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.remove-button:hover {
+    opacity: 1;
+}
+
+.orcamento-footer {
+    margin-top: 0.8rem;
+}
+
+.orcamento-footer .total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.orcamento-footer .total-row .form-group {
+    flex: 1;
+}
+
+.button-save {
+    background-color: rgba(0, 122, 255, 0.15);
+    border: 1px solid #007aff;
+    color: #007aff;
+    border-radius: 10px;
+    padding: 0.75rem 1.5rem;
+    width: auto;
+    margin: 0.5rem 0 0.5rem 0;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+    display: block;
+}
+
+.button-save:hover {
+    background-color: rgba(0, 122, 255, 0.25);
+}
+
+.procedimento-ajuda-texto {
+  font-size: 0.75rem; /* Pequeno */
+  color: #007aff;      /* Azul (cor primária) */
+  font-weight: 500;
+  margin-top: 5px;
+  margin-bottom: 0;
+  padding: 0 5px;
+}
+
+.paciente-autocomplete-list {
+    position: absolute;
+    top: 100%; /* Coloca a lista abaixo do input */
+    left: 0;
+    right: 0;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    z-index: 100;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.paciente-autocomplete-list li {
+    padding: 10px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #333;
+}
+
+.paciente-autocomplete-list li:hover {
+    background-color: #f0f8ff;
+    color: #007aff;
+}
+
+.autocomplete-info {
+    padding: 10px;
+    font-size: 0.8rem;
+    color: #666;
+    text-align: center;
+    border-top: 1px solid #eee;
+}
+
+.paciente-selecionado-tag {
+    margin-top: 5px;
+    padding: 8px 10px;
+    background-color: #e6f7ff;
+    border: 1px solid #91d5ff;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+/* Responsividade */
+@media (max-width: 992px) {
+    .top-section-wrapper {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    .orcamento-footer .total-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+@media (max-width: 768px) {
+    .procedimento-header {
+        align-items: flex-start;
+    }
+    .procedimento-inputs {
+        flex-direction: column;
+    }
+}

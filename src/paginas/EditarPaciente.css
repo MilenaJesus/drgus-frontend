@@ -1,0 +1,185 @@
+.pacientes-container {
+    padding: 0 1.5rem 2rem 1.5rem;
+    background-color: #ffffff;
+    min-height: 100vh;
+    overflow-y: auto;
+}
+
+.breadcrumbs-container {
+    display: flex;
+    padding: 0.5rem 0;
+    font-size: 1rem;
+    color: #ccc;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.breadcrumb-item {
+    color: #ccc;
+}
+
+.breadcrumb-item:last-child {
+    color: #000;
+}
+
+.separator {
+    margin: 0 0.5rem;
+}
+
+/* Título das seções */
+.section-title {
+    font-size: 1.2rem;
+    color: #555;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+}
+
+/* Estilos de tela e formulários */
+.dados-pessoais-container {
+    background-color: #ffffff;
+    border-radius: 0;
+    box-shadow: none;
+    width: 100%;
+}
+
+.registro-tela {
+    display: block;
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: 2rem auto;
+}
+
+.form-group, .form-group-textarea {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.input-field {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #f3f3f3;
+    border: none;
+    border-radius: 20px;
+    box-sizing: border-box;
+}
+
+.form-group-inline {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.form-group-inline .form-group {
+    flex: 1;
+}
+
+/* Checkbox */
+.form-checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+    color: #333;
+    cursor: pointer;
+    flex-wrap: wrap;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: auto;
+    margin-right: 10px;
+}
+
+.checkbox-label .input-conditional {
+    flex-grow: 1;
+    margin-left: 1rem;
+    background-color: #f3f3f3;
+    border: none;
+    border-radius: 20px;
+    padding: 0.5rem;
+}
+
+/* Estilos da tela de conclusão */
+.registro-concluido {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.icon-success {
+    font-size: 4rem;
+    color: #007aff;
+    font-weight: bold;
+    line-height: 1;
+}
+
+.imprimir-button {
+    background: none;
+    border: 1px solid #000;
+    color: #000;
+    padding: 0.75rem 1.5rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 1rem auto;
+}
+
+/* Estilos dos botões */
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.form-actions-full {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 2rem;
+}
+
+.button-primary {
+    background-color: rgba(0, 122, 255, 0.15);
+    color: #007aff;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.button-primary:hover {
+    background-color: rgba(0, 122, 255, 0.25);
+}
+
+.button-secondary {
+    background: none;
+    color: #000;
+    border: 1px solid #c3c3c3;
+    padding: 0.75rem 1.5rem;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.button-secondary:hover {
+    background-color: #f0f0f0;
+}

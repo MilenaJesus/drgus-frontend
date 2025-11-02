@@ -1,0 +1,92 @@
+/*Estilos de Layout Principal*/
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+    font-size: 16px;
+}
+
+.app-main-layout {
+  display: flex;
+  height: 100%;
+  padding-left: 200px;
+  background-color: #f0f2f5;
+  box-sizing: border-box;
+}
+
+.content-area {
+  flex-grow: 1;
+  overflow-y: auto; /* AQUI é onde a rolagem da PÁGINA inteira acontece */
+  background-color: #FFFFFF;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.page-content {
+  padding: 20px;
+}
+
+.floating-help-button {
+  background: none;
+  border: none;
+  padding: 0;
+  width: auto;
+  height: auto;
+  box-shadow: none;
+  position: fixed; 
+  bottom: 25px;    
+  right: 25px;     
+  z-index: 999; 
+  cursor: pointer;
+  color: #007aff;
+  font-size: 2.2rem;
+  opacity: 0.8;
+
+  transition: all 0.2s ease-in-out;
+}
+
+.floating-help-button:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/*Estilos para Mobile/Tablet (Media Queries)*/
+@media (max-width: 768px) {
+  .app-main-layout {
+    flex-direction: column;
+    padding-left: 0;
+  }
+  .sidebar {
+    width: 100% !important;
+    height: auto !important;
+    position: static !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    order: -1;
+  }
+  .content-area {
+    margin-left: 0;
+    padding-top: 10px;
+  }
+  .sidebar.hidden {
+    display: none;
+  }
+  .menu-toggle-button {
+    display: block;
+    background-color: #007AFF;
+    color: white;
+    border: none;
+    padding: 15px 20px;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+}

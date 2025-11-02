@@ -1,0 +1,146 @@
+.orcamentos-lista-container {
+  padding: 1.5rem;
+  background-color: #ffffff;
+  min-height: 100vh;
+}
+
+.novo-orcamento-button {
+  background-color: rgba(0, 122, 255, 0.15);
+  color: #007aff;
+  border: 1px solid #007aff;
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 500;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.2s;
+}
+
+.novo-orcamento-button:hover {
+  background-color: rgba(0, 122, 255, 0.25);
+}
+
+.orcamentos-tabela-wrapper {
+  overflow-x: auto;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e4e4e4;
+}
+
+.orcamentos-tabela {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.orcamentos-tabela th,
+.orcamentos-tabela td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.orcamentos-tabela thead th {
+  background-color: #f9f9f9;
+  font-weight: 500;
+  color: #555;
+}
+
+.orcamentos-tabela tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.paciente-link {
+  color: #007aff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.paciente-link:hover {
+  text-decoration: underline;
+}
+
+.actions-header-cell,
+.actions-cell {
+  text-align: center;
+  width: 120px;
+}
+
+/* Estilo dos botões de ação da tabela */
+.action-button {
+  background-color: transparent;
+  border: 1px solid #007aff;
+  color: #007aff;
+  border-radius: 4px;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin: 0 2px;
+}
+.action-button:hover {
+  background-color: rgba(0, 122, 255, 0.1);
+}
+
+/* Estilos de botão (Aprovar, Iniciar, etc.) */
+.action-button-aprovar {
+  background-color: #d4edda; color: #155724; border-color: #155724;
+}
+
+.no-data, .loading-message, .error-message {
+  text-align: center;
+  padding: 2rem;
+  font-style: italic;
+  color: #888;
+}
+
+.error-message {
+  color: #dc3545;
+  font-style: normal;
+  font-weight: 500;
+}
+
+/* Estilos dos Filtros */
+.filtros-container {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background-color: #fff;
+  border-radius: 8px;
+  justify-content: flex-end; 
+  align-items: center;
+}
+.filtros-inputs {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap; 
+  align-items: center; 
+}
+
+.filtro-grupo {
+  display: flex;
+  flex-direction: column;
+}
+
+.filtro-grupo label {
+  font-size: 0.8rem;
+  color: #666;
+  margin-bottom: 0.25rem;
+}
+
+.filtro-select,
+.filtro-input {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #fff;
+  font-size: 0.9rem;
+  min-width: 200px;
+}
+

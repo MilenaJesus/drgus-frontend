@@ -1,0 +1,177 @@
+.dashboard-container {
+  padding: 20px;
+  background-color: #ffffff;
+  flex-grow: 1;
+}
+
+.dashboard-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.flex-row-container {
+  display: flex;
+  gap: 20px;
+}
+
+.dashboard-section {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #E4E4E4; /* Borda nas caixas */
+  flex: 1; /* Faz com que as caixas dividam o espaço proporcionalmente */
+}
+
+.consultations-section {
+  flex: 1;
+}
+
+.payments-section {
+  flex: 0 0 300px;
+}
+
+.notifications-section {
+  flex: 1;
+}
+
+.acessos-rapidos-section {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  flex: 1;
+  max-width: 250px;
+  min-width: 250px;
+  border: 1px solid #E4E4E4; /* Borda nas caixas */
+}
+
+/* Outros estilos */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  color: #000000;
+}
+
+.section-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.dashboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+.dashboard-table th, .dashboard-table td {
+  border: none;
+  padding: 8px 0;
+  text-align: left;
+  color: #000000;
+}
+
+.dashboard-table th {
+  font-weight: bold;
+}
+
+.dashboard-link-button {
+  color: #007AFF;
+  text-decoration: none;
+  font-size: 14px;
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: bold;
+}
+
+.dashboard-link-button:hover {
+  text-decoration: underline;
+}
+
+.payment-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  color: #000000;
+}
+.payment-item span {
+  font-size: 14px;
+}
+.payment-item strong {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.notification-item-inicio {
+  padding: 10px 0; /* Espaçamento entre os itens */
+  border-bottom: 1px solid #f0f0f0; /* Linha separadora */
+}
+
+/* Remove a borda do último item da lista */
+.notification-list-simple .notification-item-inicio:last-child {
+  border-bottom: none;
+}
+
+/* Estilo para a MENSAGEM */
+.notification-message-inicio {
+  font-size: 0.9rem; /* 14px */
+  color: #333;
+  margin: 0 0 4px 0; /* Margem inferior para separar da data */
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+/* Estilo para a DATA */
+.notification-time-inicio {
+  font-size: 0.75rem; /* 12px */
+  color: #888;
+  display: block; /* Garante que a data fique na linha de baixo */
+}
+
+.acessos-rapidos-header h3 {
+  margin-top: 0;
+  font-size: 18px;
+  font-weight: bold;
+  color: #000000;
+}
+
+.quick-access-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.quick-access-button {
+  width: 100%;
+  background-color: rgba(0, 122, 255, 0.15);
+  border: 1px solid #007aff;
+  border-radius: 10px;
+  color: #007AFF;
+  padding: 12px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
+.quick-access-button:hover {
+  background-color: rgba(0, 122, 255, 0.25);
+}
+
+.no-data-message {
+  font-style: italic;
+  color: #555;
+  text-align: center;
+}

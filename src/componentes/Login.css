@@ -1,0 +1,159 @@
+body, html, #root {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    font-family: Arial, sans-serif;
+    background-color: #ffffff;
+    overflow-y: hidden;
+}
+
+/* Faixa superior (Header) */
+.login-header {
+    width: 100%;
+    height: 45px;
+    background-color: #E4E4E4;
+    display: flex;
+    align-items: center;
+    padding-left: 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 10;
+}
+
+.login-header-text {
+    font-family: Arial, sans-serif;
+    color: #000000;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* Container principal para centralizar o formulário */
+.login-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 45px);
+    margin-top: 45px;
+    background-color: #ffffff;
+}
+
+/* Formulário de login */
+.login-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 450px;
+    padding: 20px;
+}
+
+/* Ícone de usuário */
+.login-user-icon {
+    font-size: 70px;
+    color: #007AFF;
+    margin-bottom: 35px;
+}
+
+/* Caixa de input geral (container para label e input) */
+.form-group {
+    width: 100%;
+    margin-bottom: 18px;
+    text-align: left;
+}
+
+/* Labels (Usuário e Senha) */
+.form-group label {
+    display: block;
+    color: #000000;
+    font-size: 15px;
+    font-weight: normal;
+    margin-bottom: 9px;
+}
+
+/* Classe unificada para os inputs */
+.login-input {
+    width: 100%;
+    height: 48px;
+    padding: 0 12px;
+    background-color: #E4E4E4;
+    border: none;
+    border-radius: 10px;
+    box-sizing: border-box;
+    font-size: 15px;
+    color: #000000;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    box-shadow: none;
+    outline: none;
+}
+
+/* Regra específica para o campo de texto */
+input[type="text"] {
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+    background-image: none !important;
+}
+
+/* Links "Lembrar senha" e "Esqueceu a senha?" */
+.form-links-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 5px;
+}
+
+.form-links-container label {
+    display: flex;
+    align-items: center;
+    color: #000000;
+    font-size: 13px;
+}
+
+.form-links-container a {
+    color: #000000;
+    text-decoration: none;
+    font-size: 13px;
+}
+
+.form-links-container a:hover {
+    text-decoration: underline;
+}
+
+.form-links-container input[type="checkbox"] {
+    margin-right: 6px;
+}
+
+/* Botão de login */
+.login-button {
+    width: 170px;
+    height: 55px;
+    background-color: #E6F2FF;
+    border: 1px solid #007AFF;
+    border-radius: 8px;
+    color: #007AFF;
+    font-size: 17px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 35px;
+}
+
+.login-button:hover {
+    background-color: #cce5ff;
+}
+
+.login-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    color: #666666;
+    border: 1px solid #999999;
+}
+
+.error-message {
+    color: red;
+    margin-bottom: 15px;
+}

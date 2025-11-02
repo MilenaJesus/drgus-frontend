@@ -1,0 +1,218 @@
+.sidebar {
+    width: 200px; /* Largura do menu */
+    background-color: #E4E4EE;
+    color: #333; /* Cor de texto padrão */
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh; /* Ocupa altura total */
+    position: fixed; /* Fixo na tela */
+    top: 0;
+    left: 0;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    z-index: 999; /* Fica acima da maioria dos elementos */
+    transition: transform 0.3s ease; /* Animação suave para mobile */
+}
+
+/* Cabeçalho da Sidebar */
+.sidebar-header {
+    margin-bottom: 10px;
+    text-align: center;
+    padding: 0 20px;
+    position: relative; /* Para posicionar botão de fechar mobile */
+}
+.sidebar-header h3 {
+    font-size: 20px;
+    margin: 0;
+    padding: 10px 0;
+    color: #000000;
+    font-weight: bold;
+}
+
+/* Botão de fechar (opcional, para mobile) */
+.close-menu-button {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #333;
+    cursor: pointer;
+    display: none; /* Escondido por padrão */
+}
+.sidebar.mobile .close-menu-button {
+    display: block; /* Mostra no mobile */
+}
+
+
+/* Navegação Principal */
+.sidebar-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex-grow: 1; /* Ocupa espaço vertical disponível */
+}
+.sidebar-nav li {
+    margin-bottom: 10px; /* Espaço entre itens */
+}
+
+.sidebar-nav a {
+    position: relative; /* Link é a referência para o badge */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    color: #000000;
+    text-decoration: none;
+    border-radius: 20px;
+    margin: 0 10px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    font-size: 16px;
+    font-weight: 500;
+}
+.sidebar-nav a:hover,
+.sidebar-nav a.active {
+    background-color: rgba(0, 122, 255, 0.15);
+    color: #007AFF;
+}
+
+/*Ícones dentro dos links*/
+.sidebar-nav a i {
+    font-size: 20px;
+    flex-shrink: 0;
+    width: 24px; /* Mantém largura fixa */
+    text-align: center;
+    display: inline-block;
+    vertical-align: middle;
+    z-index: 1; /* Garante que fique abaixo do badge */
+    color: #000000;
+    transition: color 0.2s ease;
+}
+
+.sidebar-nav a:hover i {
+    color: #007AFF;
+}
+
+.sidebar-nav a.active i {
+    color: #007AFF;
+}
+
+/*Texto dentro dos links*/
+.sidebar-nav a span:not([class*="notification"]) {
+   flex-grow: 1;
+   overflow: hidden;
+   text-overflow: ellipsis;
+   white-space: nowrap;
+}
+
+/* Rodapé da Sidebar */
+.sidebar-footer {
+    margin-top: 20px;
+    padding: 15px 20px;
+    text-align: center;
+    border-top: 1px solid #ccc;
+}
+
+/* Botão de Logout */
+.logout-button {
+    background-color: rgba(0, 122, 255, 0.1);
+    border: 1px solid #007aff;
+    color: #007aff;
+    border-radius: 8px;
+    padding: 8px 16px;
+    width: auto;
+    margin: 0;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.logout-button:hover {
+    background-color: rgba(0, 122, 255, 0.2);
+}
+
+/*Badge de Notificação (POSIÇÃO RELATIVA AO LINK 'a')*/
+.menu-notification-badge {
+    position: absolute; 
+    top: 5px;       
+    left: 25px;      
+    background-color: red;
+    color: white;
+    border-radius: 50%;
+    font-size: 9px;
+    font-weight: bold;
+    min-width: 14px;
+    height: 14px;
+    box-sizing: border-box;
+    z-index: 2; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 14px; 
+}
+
+.menu-notification-dot {
+    position: absolute;
+    top: 8px;  
+    left: 28px; 
+    background-color: red;
+    border-radius: 50%;
+    width: 8px;
+    height: 8px;
+    z-index: 2;
+}
+
+.menu-toggle-button {
+    display: none;
+    background-color: #007AFF;
+    color: white;
+    border: none;
+    padding: 12px 15px;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.4);
+    z-index: 998;
+    display: none;
+}
+.sidebar.mobile.open + .sidebar-overlay {
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .menu-toggle-button {
+        display: block;
+    }
+    .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100%;
+        transform: translateX(-100%);
+        z-index: 999;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+        width: 250px;
+    }
+    .sidebar.open {
+        transform: translateX(0);
+    }
+    .app-main-layout { /* Ajusta layout principal */
+        padding-left: 0;
+    }
+    .sidebar-footer {
+         border-top: none;
+    }
+}
