@@ -14,7 +14,7 @@ import Modal from '../componentes/Modal';
 import Select from 'react-select';
 import { useToast } from '../context/ToastContext';
 
-const API_BASE_URL = 'http://localhost:8000'; 
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 const getNomeConsulta = (consulta, pacientes = []) => {
   if (consulta.paciente && typeof consulta.paciente === 'object' && consulta.paciente.nome) {
     return consulta.paciente.nome;

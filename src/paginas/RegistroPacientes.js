@@ -8,7 +8,7 @@ import { faQuestionCircle } from '@fortawesome/free-solid-svg-icons';
 import Modal from '../componentes/Modal';
 import { useToast } from '../context/ToastContext';
 
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 const validaCPF = (cpf) => {
     if (!cpf) return false;
