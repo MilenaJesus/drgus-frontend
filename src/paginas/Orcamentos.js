@@ -277,11 +277,13 @@ function Orcamentos() {
                     {pacientesFiltrados.slice(0, 8).map((paciente, idx) => {
                       const keySafe = paciente.id_paciente ?? paciente.cpf ?? `${paciente.nome}-${idx}`;
                       return (
+                        
                         <li
                           key={keySafe}
                           onMouseDown={() => handleSelecionarPaciente(paciente)}
                           title={`Selecionar ${paciente.nome}`}
                           role="option"
+                          aria-selected={pacienteSelecionadoId === String(paciente.id_paciente)}
                           tabIndex={0}
                         >
                           {paciente.nome} ({paciente.cpf ?? ''})
