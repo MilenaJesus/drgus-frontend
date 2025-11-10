@@ -230,7 +230,7 @@ function Orcamentos() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
-      showToast('Orçamento salvo com sucesso! As parcelas foram geradas.');
+      showToast('Orçamento salvo com sucesso!');
       setProcedimentosDoOrcamento([]);
       setOrcamentoForm({ paciente_id: '', data_orcamento: new Date().toISOString().split('T')[0], parcelas: '' });
       setPacienteSelecionadoId('');
