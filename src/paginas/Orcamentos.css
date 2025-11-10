@@ -1,6 +1,6 @@
 .orcamento-container {
     padding: 1.5rem;
-    background-color: #ffffff;
+    background-color: #fff;
     min-height: 100vh;
 }
 
@@ -18,7 +18,7 @@
     background-color: #fff;
     padding: 1.5rem;
     border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 6px rgb(0 0 0 / 5%);
     border: 1px solid #e4e4e4;
 }
 
@@ -43,7 +43,7 @@
     background-color: #fff;
     padding: 1.5rem;
     border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 6px rgb(0 0 0 / 5%);
     border: 1px solid #e4e4e4;
     display: flex;
     flex-direction: column;
@@ -52,7 +52,7 @@
 
 .section-title {
     font-size: 1.2rem;
-    color: #000000;
+    color: #000;
     margin-top: 0;
     margin-bottom: 0.8rem;
 }
@@ -83,7 +83,7 @@
     width: 28px;
     font-size: 0.65rem;
     text-align: center;
-    color: #000000;
+    color: #000;
 }
 
 .dente-box {
@@ -105,7 +105,7 @@
 
 .dente-box.selected {
     border-color: #007aff;
-    box-shadow: 0 0 5px rgba(0, 122, 255, 0.5);
+    box-shadow: 0 0 5px rgb(0 122 255 / 50%);
     background-color: #e3f2fd;
 }
 
@@ -125,7 +125,7 @@
 
 .dente-label {
     font-size: 0.9rem;
-    color: #000000;
+    color: #000;
     font-weight: bold;
 }
 
@@ -152,7 +152,7 @@
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    border: 1px solid #000000;
+    border: 1px solid #000;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -161,7 +161,7 @@
 }
 
 .face-button .face-icon {
-    color: #000000;
+    color: #000;
     font-size: 0.7rem;
     opacity: 0;
     transition: opacity 0.2s;
@@ -169,11 +169,11 @@
 
 .face-button span {
     font-size: 0.55rem;
-    color: #000000;
+    color: #000;
 }
 
 .face-button.selected .face-circle {
-    background-color: rgba(0, 122, 255, 0.15);
+    background-color: rgb(0 122 255 / 15%);
     border-color: #007aff;
 }
 
@@ -195,7 +195,7 @@
 }
 
 .form-group label {
-    color: #000000;
+    color: #000;
     margin-bottom: 4px;
     font-size: 0.8rem;
 }
@@ -205,14 +205,14 @@
     border: 1px solid #e4e4e4;
     border-radius: 10px;
     padding: 0.4rem 1.5rem 0.4rem 0.4rem;
-    color: #000000;
+    color: #000;
     font-size: 0.85rem;
     width: 100%;
     box-sizing: border-box;
 }
 
 .add-button {
-    background-color: rgba(0, 122, 255, 0.15);
+    background-color: rgb(0 122 255 / 15%);
     border: 1px solid #007aff;
     color: #007aff;
     border-radius: 10px;
@@ -224,7 +224,7 @@
 }
 
 .add-button:hover {
-    background-color: rgba(0, 122, 255, 0.25);
+    background-color: rgb(0 122 255 / 25%);
 }
 
 .orcamento-header {
@@ -234,7 +234,7 @@
 .orcamento-header h3,
 .tabela-procedimentos-wrapper h4 {
     font-size: 1.1rem;
-    color: #000000;
+    color: #000;
     margin-bottom: 0.2rem;
 }
 
@@ -273,13 +273,13 @@
 .tabela-procedimentos-wrapper th {
     background-color: #f9f9f9;
     font-weight: 500;
-    color: #000000;
+    color: #000;
 }
 
 .remove-button {
     background: none;
     border: none;
-    color: #000000;
+    color: #000;
     cursor: pointer;
     font-size: 0.9rem;
     opacity: 0.8;
@@ -307,20 +307,20 @@
 }
 
 .button-save {
-    background-color: rgba(0, 122, 255, 0.15);
+    background-color: rgb(0 122 255 / 15%);
     border: 1px solid #007aff;
     color: #007aff;
     border-radius: 10px;
     padding: 0.75rem 1.5rem;
     width: auto;
-    margin: 0.5rem 0 0.5rem 0;
+    margin: 0.5rem 0;
     font-size: 0.9rem;
     transition: background-color 0.2s;
     display: block;
 }
 
 .button-save:hover {
-    background-color: rgba(0, 122, 255, 0.25);
+    background-color: rgb(0 122 255 / 25%);
 }
 
 .procedimento-ajuda-texto {
@@ -341,7 +341,7 @@
     border: 1px solid #ccc;
     border-top: none;
     border-radius: 0 0 4px 4px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px rgb(0 0 0 / 10%);
     list-style: none;
     padding: 0;
     margin: 0;
@@ -380,20 +380,23 @@
 }
 
 /* Responsividade */
-@media (max-width: 992px) {
+@media (width <= 992px) {
     .top-section-wrapper {
         flex-direction: column;
         gap: 1.5rem;
     }
+
     .orcamento-footer .total-row {
         flex-direction: column;
         align-items: flex-start;
     }
 }
-@media (max-width: 768px) {
+
+@media (width <= 768px) {
     .procedimento-header {
         align-items: flex-start;
     }
+
     .procedimento-inputs {
         flex-direction: column;
     }

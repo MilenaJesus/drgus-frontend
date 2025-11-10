@@ -101,7 +101,7 @@ function ListaPacientes() {
       setPacienteParaExcluir(null);
     }
   };
-  
+
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     setOffset(0); 

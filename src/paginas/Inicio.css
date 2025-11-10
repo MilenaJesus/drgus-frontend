@@ -1,6 +1,6 @@
 .dashboard-container {
   padding: 20px;
-  background-color: #ffffff;
+  background-color: #fff;
   flex-grow: 1;
 }
 
@@ -16,10 +16,10 @@
 }
 
 .dashboard-section {
-  background-color: #ffffff;
+  background-color: #fff;
   border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px rgb(0 0 0 / 10%);
   border: 1px solid #E4E4E4; /* Borda nas caixas */
   flex: 1; /* Faz com que as caixas dividam o espaço proporcionalmente */
 }
@@ -37,10 +37,10 @@
 }
 
 .acessos-rapidos-section {
-  background-color: #ffffff;
+  background-color: #fff;
   border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px rgb(0 0 0 / 10%);
   flex: 1;
   max-width: 250px;
   min-width: 250px;
@@ -53,7 +53,7 @@
   align-items: center;
   gap: 10px;
   margin-bottom: 15px;
-  color: #000000;
+  color: #000;
 }
 
 .section-header h2 {
@@ -73,7 +73,7 @@
   border: none;
   padding: 8px 0;
   text-align: left;
-  color: #000000;
+  color: #000;
 }
 
 .dashboard-table th {
@@ -99,11 +99,13 @@
   display: flex;
   justify-content: space-between;
   padding: 8px 0;
-  color: #000000;
+  color: #000;
 }
+
 .payment-item span {
   font-size: 14px;
 }
+
 .payment-item strong {
   font-size: 14px;
   font-weight: bold;
@@ -123,7 +125,7 @@
 .notification-message-inicio {
   font-size: 0.9rem; /* 14px */
   color: #333;
-  margin: 0 0 4px 0; /* Margem inferior para separar da data */
+  margin: 0 0 4px; /* Margem inferior para separar da data */
   line-height: 1.4;
   font-weight: 500;
 }
@@ -139,7 +141,7 @@
   margin-top: 0;
   font-size: 18px;
   font-weight: bold;
-  color: #000000;
+  color: #000;
 }
 
 .quick-access-buttons {
@@ -150,7 +152,7 @@
 
 .quick-access-button {
   width: 100%;
-  background-color: rgba(0, 122, 255, 0.15);
+  background-color: rgb(0 122 255 / 15%);
   border: 1px solid #007aff;
   border-radius: 10px;
   color: #007AFF;
@@ -167,7 +169,7 @@
 }
 
 .quick-access-button:hover {
-  background-color: rgba(0, 122, 255, 0.25);
+  background-color: rgb(0 122 255 / 25%);
 }
 
 .no-data-message {

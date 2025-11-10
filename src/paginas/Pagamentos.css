@@ -1,6 +1,6 @@
 .pagamentos-container {
     padding: 1.5rem;
-    background-color: #ffffff;
+    background-color: #fff;
     min-height: 100vh;
 }
 
@@ -39,14 +39,14 @@
   margin-bottom: 0; /* Remove a margem do h2, pois o container já tem */
 }
 
-/*Estilo dos Blocos Principais*/
+/* Estilo dos Blocos Principais */
 .card-section {
     background-color: #fff;
     padding: 1.5rem 2rem;
     border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 6px rgb(0 0 0 / 5%);
     border: 1px solid #e4e4e4;
-    margin-bottom: 1.5rem; /*Espaçamento entre os cards*/
+    margin-bottom: 1.5rem; /* Espaçamento entre os cards */
 }
 
 .card-section h2,
@@ -56,7 +56,7 @@
     color: #333;
 }
 
-/*Formulário e Campos*/
+/* Formulário e Campos */
 .form-row {
     display: flex;
     gap: 1.5rem;
@@ -111,7 +111,7 @@
 .select-field:focus {
     border-color: #007aff;
     outline: none;
-    box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
+    box-shadow: 0 0 0 2px rgb(0 122 255 / 20%);
 }
 
 .select-field:disabled,
@@ -120,7 +120,7 @@
     cursor: not-allowed;
 }
 
-/*Campos ReadOnly*/
+/* Campos ReadOnly */
 .input-field-readonly {
     width: 100%;
     padding: 0.75rem;
@@ -134,9 +134,9 @@
 }
 
 
-/*Tabela de Parcelas*/
+/* Tabela de Parcelas */
 .parcelas-tabela-wrapper {
-    overflow-x: auto; /*Permite rolagem horizontal se a tabela for larga*/
+    overflow-x: auto; /* Permite rolagem horizontal se a tabela for larga */
     margin-top: 1rem;
 }
 
@@ -151,26 +151,26 @@
     padding: 0.8rem 1rem;
     text-align: left;
     border-bottom: 1px solid #eee;
-    white-space: nowrap; /*Evita quebra de linha*/
+    white-space: nowrap; /* Evita quebra de linha */
 }
 
 .parcelas-tabela thead th {
-    background-color: #f8f9fa; /*Fundo do cabeçalho*/
+    background-color: #f8f9fa; /* Fundo do cabeçalho */
     font-weight: 600;
     color: #495057;
 }
 
 .parcelas-tabela tbody tr:hover {
-    background-color: #f1f1f1; /*Cor ao passar o mouse*/
+    background-color: #f1f1f1; /* Cor ao passar o mouse */
 }
 
-/*Estilo para a linha selecionada*/
+/* Estilo para a linha selecionada */
 .parcelas-tabela tbody tr.selected-row {
     background-color: #cfe2ff; 
     font-weight: 500;
 }
 
-/*Botão Selecionar na Tabela*/
+/* Botão Selecionar na Tabela */
 .button-select-parcela {
     background-color: #e6f2ff;
     color: #007aff;
@@ -193,12 +193,12 @@
     cursor: default;
 }
 
-/*Formulário*/
+/* Formulário */
 .pagamentos-form-simple {
     margin-top: 1rem;
 }
 
-/*Ações do Formulário*/
+/* Ações do Formulário */
 .form-actions-pagamento {
     display: flex;
     justify-content: space-between; 
@@ -208,9 +208,9 @@
     border-top: 1px solid #eee; /* Linha separadora */
 }
 
-/*Reutiliza button-primary e button-secondary */
+/* Reutiliza button-primary e button-secondary */
 .button-primary {
-    background-color: rgba(0, 122, 255, 0.15);
+    background-color: rgb(0 122 255 / 15%);
     color: #007aff;
     border: 1px solid #007aff;
     padding: 0.75rem 1.5rem;
@@ -220,8 +220,9 @@
     font-weight: 500;
     transition: background-color 0.2s;
 }
+
 .button-primary:hover {
-    background-color: rgba(0, 122, 255, 0.25);
+    background-color: rgb(0 122 255 / 25%);
 }
 
 .button-secondary {
@@ -235,29 +236,32 @@
     font-weight: 500;
     transition: background-color 0.2s;
 }
+
 .button-secondary:hover {
     background-color: #f1f1f1;
 }
 
-/*Mensagens*/
+/* Mensagens */
 .loading-message, .error-message {
     text-align: center;
     padding: 1rem;
     font-size: 1rem;
     color: #555;
 }
+
 .error-message {
     color: #dc3545;
     font-weight: 500;
 }
 
-/*Responsividade*/
-@media (max-width: 768px) {
+/* Responsividade */
+@media (width <= 768px) {
     .form-row {
         flex-direction: column; /* Coloca campos um abaixo do outro em telas pequenas */
         gap: 1rem;
         margin-bottom: 0;
     }
+
     .form-group {
          margin-bottom: 1rem; /* Adiciona espaço abaixo de cada campo na vertical */
     }

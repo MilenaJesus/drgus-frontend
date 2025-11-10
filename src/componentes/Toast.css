@@ -3,14 +3,17 @@
         opacity: 0;
         transform: translateY(-20px);
     }
+
     15% { /* Fade-in rápido */
         opacity: 1;
         transform: translateY(0);
     }
+
     85% { /* Fica visível */
         opacity: 1;
         transform: translateY(0);
     }
+
     100% { /* Fade-out no final */
         opacity: 0;
         transform: translateY(-20px);
@@ -23,7 +26,7 @@
     right: 20px;
     padding: 1rem 1.5rem;
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
     display: flex;
     align-items: center;
     z-index: 2000; 

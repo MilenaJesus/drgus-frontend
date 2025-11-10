@@ -4,7 +4,7 @@ body, html, #root {
     width: 100%;
     height: 100%;
     font-family: Arial, sans-serif;
-    background-color: #ffffff;
+    background-color: #fff;
     overflow-y: hidden;
 }
 
@@ -24,7 +24,7 @@ body, html, #root {
 
 .login-header-text {
     font-family: Arial, sans-serif;
-    color: #000000;
+    color: #000;
     font-size: 18px;
     font-weight: bold;
 }
@@ -37,7 +37,7 @@ body, html, #root {
     justify-content: center;
     min-height: calc(100vh - 45px);
     margin-top: 45px;
-    background-color: #ffffff;
+    background-color: #fff;
 }
 
 /* Formulário de login */
@@ -67,7 +67,7 @@ body, html, #root {
 /* Labels (Usuário e Senha) */
 .form-group label {
     display: block;
-    color: #000000;
+    color: #000;
     font-size: 15px;
     font-weight: normal;
     margin-bottom: 9px;
@@ -83,9 +83,7 @@ body, html, #root {
     border-radius: 10px;
     box-sizing: border-box;
     font-size: 15px;
-    color: #000000;
-    -webkit-appearance: none;
-    -moz-appearance: none;
+    color: #000;
     appearance: none;
     box-shadow: none;
     outline: none;
@@ -93,8 +91,6 @@ body, html, #root {
 
 /* Regra específica para o campo de texto */
 input[type="text"] {
-    -webkit-appearance: none !important;
-    -moz-appearance: none !important;
     appearance: none !important;
     background-image: none !important;
 }
@@ -110,12 +106,12 @@ input[type="text"] {
 .form-links-container label {
     display: flex;
     align-items: center;
-    color: #000000;
+    color: #000;
     font-size: 13px;
 }
 
 .form-links-container a {
-    color: #000000;
+    color: #000;
     text-decoration: none;
     font-size: 13px;
 }
@@ -147,10 +143,10 @@ input[type="text"] {
 }
 
 .login-button:disabled {
-    background-color: #cccccc;
+    background-color: #ccc;
     cursor: not-allowed;
-    color: #666666;
-    border: 1px solid #999999;
+    color: #666;
+    border: 1px solid #999;
 }
 
 .error-message {
