@@ -17,7 +17,7 @@ function ListaTratamentos() {
     const { showToast } = useToast();
 
     const [filtroPaciente, setFiltroPaciente] = useState('');
-    const [filtroStatus, setFiltroStatus] = useState('Iniciado');
+    const [filtroStatus, setFiltroStatus] = useState('');
 
     const [isAjudaOpen, setIsAjudaOpen] = useState(false);
     const [itemExpandidoId, setItemExpandidoId] = useState(null);
@@ -34,6 +34,7 @@ function ListaTratamentos() {
     };
 
     const fetchTratamentos = useCallback(async () => {
+        console.log("Buscando tratamentos em:", `${API_BASE_URL}/api/tratamentos/`);
         setLoading(true);
         setError(null);
         try {
@@ -56,13 +57,14 @@ function ListaTratamentos() {
             headers: { 'Authorization': `Bearer ${token}` },
             params: params
         });
+        console.log("Resposta da API:", response.data);
         
         setTratamentos(response.data.results || []);
         setTotalTratamentos(response.data.count || 0);
 
         } catch (err) {
         if (err.response && err.response.status === 401) {
-            alert('Sua sessão expirou.');
+            showToast('Sua sessão expirou.');
             navigate('/login');
         } else {
             setError('Não foi possível carregar os tratamentos.');
@@ -70,12 +72,36 @@ function ListaTratamentos() {
         } finally {
         setLoading(false);
         }
-    }, [navigate, filtroPaciente, filtroStatus, limit, offset]);
+    }, [navigate, filtroPaciente, filtroStatus, limit, offset, showToast]);
 
     useEffect(() => {
         fetchTratamentos();
     }, [fetchTratamentos]);
     
+    const handleIniciarTratamento = async (tratamentoId) => {
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+            showToast('Sessão expirada. Faça login novamente.', 'error');
+            return; 
+        }
+
+        try {
+            await axios.post(`${API_BASE_URL}/api/tratamentos/${tratamentoId}/iniciar/`, 
+            {}, 
+            { headers: { 'Authorization': `Bearer ${token}` } }
+            );
+
+            showToast('Tratamento iniciado com sucesso!', 'success');
+            fetchTratamentos();
+
+        } catch (err) {
+            console.error("Erro ao iniciar tratamento:", err);
+            const erroMsg = err.response?.data?.error || 'Não foi possível iniciar o tratamento.';
+            showToast(erroMsg, 'error');
+        }
+        };
+
+
     const handleEncerrarTratamento = async (tratamentoId) => {
         const token = localStorage.getItem('access_token');
         if (!token) {
@@ -145,6 +171,7 @@ function ListaTratamentos() {
                             onChange={(e) => setFiltroStatus(e.target.value)}
                             title="Exibir tratamentos com o status selecionado."
                         >
+                            <option value="Pendente">Pendente</option>
                             <option value="Iniciado">Em Andamento (Iniciado)</option>
                             <option value="Concluído">Concluído</option>
                             <option value="">Todos os Status</option>
@@ -202,7 +229,15 @@ function ListaTratamentos() {
                                 >
                                     <FontAwesomeIcon icon={faEye} /> 
                                 </button>
-                                
+                                {trat.status === "Pendente" && (
+                                    <button 
+                                        className="action-button action-button-iniciar"
+                                        title="Iniciar este tratamento."
+                                        onClick={() => handleIniciarTratamento(trat.id_tratamento)}
+                                    >
+                                        Iniciar
+                                    </button>
+                                    )}
                                 {trat.status === "Iniciado" && (
                                     <button 
                                         className="action-button action-button-encerrar"

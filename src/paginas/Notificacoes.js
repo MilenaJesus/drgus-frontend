@@ -8,17 +8,18 @@ import { formatDistanceToNow } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 import { faQuestionCircle } from '@fortawesome/free-solid-svg-icons';
 import Modal from '../componentes/Modal';
+import { useToast } from '../context/ToastContext';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 function Notificacoes() {
+    const { showToast } = useToast();
     const [notificacoes, setNotificacoes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
     const [isAjudaOpen, setIsAjudaOpen] = useState(false);
 
-    // Função para buscar as notificações da API
     const fetchNotificacoes = useCallback(async () => {
         setError(null); 
         setLoading(true); 
@@ -35,7 +36,7 @@ function Notificacoes() {
         setNotificacoes(response.data.results || response.data || []);
         } catch (err) {
         if (err.response && err.response.status === 401) {
-            alert('Sua sessão expirou. Por favor, faça o login novamente.');
+            showToast('Sua sessão expirou. Por favor, faça o login novamente.');
             navigate('/login');
         } else {
             setError('Não foi possível carregar as notificações.');
@@ -44,51 +45,45 @@ function Notificacoes() {
         } finally {
         setLoading(false);
         }
-    }, [navigate]);
+    }, [navigate, showToast]);
 
-    // Busca as notificações quando o componente monta
     useEffect(() => {
         fetchNotificacoes();
     }, [fetchNotificacoes]);
 
-    // Função para marcar uma notificação como lida
     const handleMarcarComoLida = async (id) => {
         try {
             const token = localStorage.getItem('access_token');
             if (!token) throw new Error('Token não encontrado.');
 
-            // Envia um PATCH para a API atualizando apenas o campo 'lida'
             await axios.patch(
                 `${API_BASE_URL}/api/notificacoes/${id}/`,
-                { lida: true }, // Dados a serem atualizados
+                { lida: true },
                 { headers: { 'Authorization': `Bearer ${token}` } }
             );
 
-            // Atualiza o estado local para refletir a mudança visualmente
             setNotificacoes(prevNotificacoes => 
                 prevNotificacoes.filter(notif => notif.id_notificacao !== id)
             );
 
         } catch (err) {
             console.error('Erro ao marcar notificação como lida:', err);
-            alert('Não foi possível marcar a notificação como lida.');
+            showToast('Não foi possível marcar a notificação como lida.');
              if (err.response && err.response.status === 401) {
-                 alert('Sessão expirada. Faça login novamente.');
+                 showToast('Sessão expirada. Faça login novamente.');
                  navigate('/login');
              }
         }
     };
 
-    // Função para formatar o tempo relativo
      const formatTempoAtras = (dateString) => {
          try {
              return formatDistanceToNow(new Date(dateString), { addSuffix: true, locale: ptBR });
          } catch (e) {
-             return dateString; // Retorna a string original se der erro
+             return dateString;
          }
      };
 
-    // Renderização do componente
     if (loading) return <div className="loading-message">Carregando notificações...</div>;
     if (error) return <div className="error-message">{error}</div>;
 
@@ -98,7 +93,6 @@ function Notificacoes() {
             <div className="notificacoes-list">
                 {notificacoes.length > 0 ? (
                     notificacoes.map(notificacao => (
-                        // Adiciona uma classe se a notificação já foi lida
                         <div key={notificacao.id_notificacao} className={`notificacao-card ${notificacao.lida ? 'lida' : ''}`}>
                             <div className="notificacao-content">
                                 {/* Usa ícone diferente se já lida */}
@@ -125,7 +119,6 @@ function Notificacoes() {
                         </div>
                     ))
                 ) : (
-                    // Mensagem se não houver notificações
                     <div className="no-data">Nenhuma notificação encontrada.</div>
                 )}
             </div>

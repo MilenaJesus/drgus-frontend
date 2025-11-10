@@ -12,15 +12,15 @@ import {
 import ptBR from 'date-fns/locale/pt-BR';
 import Modal from '../componentes/Modal';
 import Select from 'react-select';
+import { useToast } from '../context/ToastContext';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
-
+const API_BASE_URL = 'http://localhost:8000'; 
 const getNomeConsulta = (consulta, pacientes = []) => {
   if (consulta.paciente && typeof consulta.paciente === 'object' && consulta.paciente.nome) {
     return consulta.paciente.nome;
   }
   if (typeof consulta.paciente === 'number') {
-    const pacienteObj = pacientes.find(p => p.id_paciente === consulta.paciente);
+    const pacienteObj = pacientes.find(p => p.id_paciente === consulta.paciente); 
     if (pacienteObj) return pacienteObj.nome;
   }
   if (consulta.nome_paciente_temp) {
@@ -28,6 +28,7 @@ const getNomeConsulta = (consulta, pacientes = []) => {
   }
   return 'Paciente Indefinido';
 };
+
 
 const capitalize = (s) => {
   if (typeof s !== 'string') return "";
@@ -40,7 +41,7 @@ const getDayName = (dayIndex) => {
 };
 
 const getWeekDays = (date) => {
-  const weekStartsOn = 1; // Segunda-feira
+  const weekStartsOn = 1;
   const start = startOfWeek(date, { weekStartsOn, locale: ptBR });
   const weekDays = eachDayOfInterval({
     start: start,
@@ -67,6 +68,7 @@ const getDaysInMonthGrid = (date) => {
 };
 
 function Agenda() {
+  const { showToast } = useToast();
   const [agendamentos, setAgendamentos] = useState([]);
   const [view, setView] = useState('semanal');
   const [dataAtual, setDataAtual] = useState(new Date());
@@ -85,6 +87,7 @@ function Agenda() {
   const [selectedPaciente, setSelectedPaciente] = useState(null);
   const [newStatus, setNewStatus] = useState("");
   const [pacientes, setPacientes] = useState([]);
+  const [isPacientesLoading, setIsPacientesLoading] = useState(false);
   const navigate = useNavigate();
   const [modalView, setModalView] = useState('details');
   const [isAjudaOpen, setIsAjudaOpen] = useState(false);
@@ -124,45 +127,72 @@ function Agenda() {
     }
   }, [navigate]);
 
-  const fetchPacientes = useCallback(async () => {
-    setError(null);
-    try {
-      const token = localStorage.getItem('access_token');
-      if (!token) throw new Error('Token de autenticação não encontrado.');
-      const response = await axios.get(`${API_BASE_URL}/api/pacientes/lookup/`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      setPacientes(response.data.results || response.data || []);
-    } catch (err) { console.error('Erro pacientes:', err); setError("Falha ao carregar pacientes");}
-  }, []);
-
   useEffect(() => {
     setLoading(true);
     const initData = async () => {
       await Promise.all([
         fetchAgendamentos(),
-        fetchPacientes()
       ]);
       setLoading(false);
     };
     initData();
-  }, [fetchAgendamentos, fetchPacientes]);
+  }, [fetchAgendamentos]);
+
+  useEffect(() => {
+    if (!showForm) {
+      return;
+    }
+
+    const buscarPacientesDoModal = async () => {
+      console.log("MODAL DEBUG: 1. Modal abriu, buscando pacientes...");
+      setIsPacientesLoading(true);
+      setError(null);
+
+      try {
+        const token = localStorage.getItem('access_token');
+        if (!token) throw new Error('Token de autenticação não encontrado.');
+
+        // Busca na rota /api/pacientes/ (que envia 'id_paciente')
+        const response = await axios.get(`${API_BASE_URL}/api/pacientes/`, { 
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        console.log("MODAL DEBUG: 2. API respondeu:", response.data);
+
+        const dadosBrutos = response.data.results || response.data || []; 
+
+        if (Array.isArray(dadosBrutos)) {
+          setPacientes(dadosBrutos); 
+          console.log("MODAL DEBUG: 3. Dados salvos no estado.");
+        } else {
+          console.error("MODAL DEBUG: ERRO! A API não retornou um array.");
+          setPacientes([]);
+        }
+
+      } catch (err) { 
+        console.error('MODAL DEBUG: ERRO! A requisição falhou:', err.response || err.message);
+        setError("Falha ao carregar pacientes. Verifique o console.");
+      } finally {
+        console.log("MODAL DEBUG: 4. Finalizando, desligando 'Buscando...'.");
+        setIsPacientesLoading(false);
+      }
+    };
+
+    buscarPacientesDoModal();
+
+  }, [showForm]);
 
   const opcoesPacientes = useMemo(() => {
     return pacientes.map(p => ({
-    value: p.id_paciente, 
-    label: p.nome
+      value: p.id_paciente, 
+      label: p.nome
     }));
   }, [pacientes]);
 
   const handleNavegacao = (diasOuMeses) => {
     let novaData = new Date(dataAtual);
     if (view === 'mensal') {
-      if (diasOuMeses > 0) {
-        novaData = addMonths(dataAtual, 1);
-      } else {
-        novaData = subMonths(dataAtual, 1);
-      }
+      novaData = diasOuMeses > 0 ? addMonths(dataAtual, 1) : subMonths(dataAtual, 1);
     } else if (view === 'semanal') {
       novaData.setDate(dataAtual.getDate() + diasOuMeses);
     } else {
@@ -191,7 +221,7 @@ function Agenda() {
     e.preventDefault();
     const userId = localStorage.getItem('user_id');
     if (!userId) {
-      alert("Erro: ID do usuário não encontrado. Faça login novamente.");
+      showToast("Erro: ID do usuário não encontrado. Faça login novamente.");
       return;
     }
 
@@ -204,14 +234,14 @@ function Agenda() {
 
     if (isUnregisteredPatient) {
       if (!unregisteredPatientName.trim()) {
-        alert('Por favor, insira o nome do paciente não cadastrado.');
+        showToast('Por favor, insira o nome do paciente não cadastrado.');
         return;
       }
       agendamentoData.nome_paciente_temp = unregisteredPatientName.trim();
       agendamentoData.paciente = null;
     } else {
       if (!novoAgendamento.paciente) {
-        alert('Por favor, selecione um paciente cadastrado.');
+        showToast('Por favor, selecione um paciente cadastrado.');
         return;
       }
       agendamentoData.paciente = parseInt(novoAgendamento.paciente);
@@ -220,7 +250,7 @@ function Agenda() {
     
     const dataConsulta = parseISO(novoAgendamento.data_consulta);
     if (getDay(dataConsulta) === 0 || getDay(dataConsulta) === 6) { 
-      alert('Não é possível agendar consultas aos Sábados ou Domingos.');
+      showToast('Não é possível agendar consultas aos Sábados ou Domingos.');
       return;
     }
 
@@ -229,7 +259,7 @@ function Agenda() {
       await axios.post(`${API_BASE_URL}/api/agendamentos/`, agendamentoData, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      alert('Consulta agendada com sucesso!');
+      showToast('Consulta agendada com sucesso!');
       setIsUnregisteredPatient(false);
       setUnregisteredPatientName("");
       setShowForm(false);
@@ -251,9 +281,10 @@ function Agenda() {
       } else {
         errorMessage = err.message;
       }
-      alert(`Erro ao criar agendamento: ${errorMessage}`);
+      showToast(`Erro ao criar agendamento: ${errorMessage}`);
     }
   };
+
 
   const weekDays = useMemo(() => getWeekDays(dataAtual), [dataAtual]);
   const monthDays = useMemo(() => getDaysInMonthGrid(dataAtual), [dataAtual]);
@@ -357,6 +388,7 @@ function Agenda() {
     const daysToRender = view === 'semanal' ? weekDays : [dataAtual];
     const [slotHour, slotMinute] = hora.split(':').map(Number);
     const now = new Date();
+
     return daysToRender.map(day => {
       const slotStart = new Date(day);
       slotStart.setHours(slotHour, slotMinute, 0, 0);
@@ -364,13 +396,18 @@ function Agenda() {
       slotEnd.setMinutes(slotStart.getMinutes() + 30);
       
       const agendamento = agendamentos.find(ag => {
-        const agendamentoDate = parseISO(ag.data_consulta);
-        const [agHour, agMinute] = ag.horario_consulta.split(':').map(Number);
-        const agendamentoTime = new Date(agendamentoDate);
-        agendamentoTime.setHours(agHour, agMinute, 0, 0);
-        return isSameDay(agendamentoDate, day) &&
-          agendamentoTime >= slotStart &&
-          agendamentoTime < slotEnd;
+        try {
+          const agendamentoDate = parseISO(ag.data_consulta);
+          const [agHour, agMinute] = ag.horario_consulta.split(':').map(Number);
+          const agendamentoTime = new Date(agendamentoDate);
+          agendamentoTime.setHours(agHour, agMinute, 0, 0);
+          return isSameDay(agendamentoDate, day) &&
+            agendamentoTime >= slotStart &&
+            agendamentoTime < slotEnd;
+        } catch (e) {
+          console.error("Erro ao processar data/hora do agendamento:", ag, e);
+          return false;
+        }
       });
 
       const isPastSlot = isBefore(slotStart, now);
@@ -414,6 +451,7 @@ function Agenda() {
     const startOfCurrentMonth = startOfMonth(dataAtual);
     const endOfCurrentMonth = endOfMonth(dataAtual);
     const weekDaysNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
     return (
       <div className="monthly-grid-wrapper">
         <div className="month-header-row">
@@ -561,21 +599,26 @@ function Agenda() {
                     id="paciente"
                     name="paciente"
                     options={opcoesPacientes}
-                    value={opcoesPacientes.find(p => p.value === parseInt(novoAgendamento.paciente, 10))}
+                    value={opcoesPacientes.find(p => p.value === novoAgendamento.paciente)}
                     onChange={(opcaoSelecionada) => {
                       const eventoSimulado = {
                         target: {
                           name: 'paciente',
-                          value: opcaoSelecionada ? opcaoSelecionada.value : ""
+                          value: opcaoSelecionada ? opcaoSelecionada.value : "" 
                         }
                       };
                       handleInputChange(eventoSimulado);
                     }}
                     className="input-field-react-select"
                     classNamePrefix="react-select"
-                    placeholder="Digite ou selecione o paciente..."
+                    isLoading={isPacientesLoading}
+                    placeholder={
+                      isPacientesLoading 
+                        ? "Buscando pacientes..." 
+                        : "Digite ou selecione o paciente..."
+                    }
                     isSearchable={true}
-                    isClearable={true} 
+                    isClearable={true}
                     required
                     title="Selecione um paciente já cadastrado."
                   />
@@ -623,6 +666,7 @@ function Agenda() {
         </div>
       )}
 
+      {/*VISUALIZAÇÃO DA AGENDA*/}
       <div className="schedule-options">
         <div className="schedule-options-left">
           <span className="horarios-text">
@@ -663,6 +707,7 @@ function Agenda() {
         </div>
       )}
       
+      {/*LEGENDA*/}
       {view !== 'mensal' && (
         <div className="legend-fixed-footer">
           <div className="legend">
@@ -674,6 +719,7 @@ function Agenda() {
         </div>
       )}
       
+      {/*MODAL DE DETALHES DA CONSULTA*/}
       {showDetailModal && selectedAgendamento && (
         <div className="modal-backdrop" onClick={() => setShowDetailModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -735,6 +781,7 @@ function Agenda() {
                 </div>
               </>
             ) : (
+              //MODAL DE CONFIRMAR EXCLUSÃO
               <>
                 <h3>Confirmar Exclusão</h3>
                 <p>Tem certeza que deseja excluir esta consulta?</p>
@@ -764,7 +811,7 @@ function Agenda() {
         </div>
       )}
 
-      {/* --- BOTÃO E MODAL DE AJUDA --- */}
+      {/*BOTÃO E MODAL DE AJUDA*/}
       <button 
         className="floating-help-button" 
         onClick={() => setIsAjudaOpen(true)}
@@ -781,32 +828,24 @@ function Agenda() {
           <button 
             className="modal-button modal-button-secondary" 
             onClick={() => setIsAjudaOpen(false)}
-            title="Fechar esta janela."
           >
             Fechar
           </button>
         }
       >
-        <p>Esta é a sua agenda. Por padrão, ela bloqueia agendamentos em dias passados, Sábados e Domingos.</p>
+        <p>Esta tela guia você pelo cadastro de um novo paciente em 4 etapas:</p>
         <ul style={{ paddingLeft: '20px', lineHeight: '1.6' }}>
           <li>
-            <strong>Navegação:</strong> Use as setas (❮ ❯) para mudar o dia, semana ou mês.
+            <strong>Dados Pessoais:</strong> Informações básicas de cadastro e contato. Campos com * (asterisco) são obrigatórios.
           </li>
           <li>
-            <strong>Visões:</strong> Alterne entre as visualizações "Mês", "Semana" e "Dia" no canto superior direito.
+            <strong>Anamnese 1 e 2:</strong> Questionário de saúde. Os campos "Motivo da consulta" e "Último tratamento" são obrigatórios. Nas demais perguntas (checkboxes), a descrição se torna obrigatória caso a opção seja marcada (selecionada).
           </li>
           <li>
-            <strong>Agendar:</strong> Clique em um horário vago (na visão de Semana ou Dia) ou em um dia livre (na visão de Mês) para abrir o formulário de "Nova Consulta".
-          </li>
-          <li>
-            <strong>Pacientes Não Cadastrados:</strong> No formulário de "Nova Consulta", você pode usar o link "(Paciente não cadastrado)" para digitar o nome de um paciente que apenas ligou.
-          </li>
-          <li>
-            <strong>Ver Detalhes:</strong> Clique em um agendamento já existente na grade para ver seus detalhes, alterar o status (ex: Pendente para Confirmado) ou excluir a consulta.
+            <strong>Concluir e Salvar:</strong> Permite salvar o paciente no sistema e imprimir a ficha de anamnese.
           </li>
         </ul>
       </Modal>
-
     </div>
   );
 }

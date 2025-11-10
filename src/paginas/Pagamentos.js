@@ -6,6 +6,7 @@ import { format } from 'date-fns';
 import Modal from '../componentes/Modal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faQuestionCircle } from '@fortawesome/free-solid-svg-icons';
+import { useToast } from '../context/ToastContext';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 const mockFormasPagamento = ['Cartão de Crédito', 'Débito', 'Pix', 'Dinheiro'];
@@ -29,13 +30,17 @@ function Pagamentos() {
     valor_recebido: '',
     tipo: '',
   });
+  const { showToast } = useToast();
 
   //Funções de Busca
   const fetchPacientes = useCallback(async () => {
     setLoadingPacientes(true);
     try {
       const token = localStorage.getItem('access_token');
-      if (!token) throw new Error('Token de autenticação não encontrado.');
+      if (!token) {
+        showToast('Token de autenticação não encontrado.', 'error');
+        return;
+      }
       const response = await axios.get(`${API_BASE_URL}/api/pacientes/`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -44,13 +49,13 @@ function Pagamentos() {
       console.error('Erro ao buscar pacientes:', err);
       setError('Falha ao carregar pacientes.');
       if (err.response && err.response.status === 401) {
-        alert('Sessão expirada. Faça login novamente.');
+        showToast('Sessão expirada. Faça login novamente.', 'error');
         navigate('/login');
       }
     } finally {
       setLoadingPacientes(false);
     }
-  }, [navigate]);
+  }, [navigate, showToast]);
 
   const fetchParcelas = useCallback(async (pacienteId) => {
     setLoadingParcelas(true);
@@ -62,13 +67,11 @@ function Pagamentos() {
     let params = {};
 
     if (pacienteId) {
-      // Se um paciente é selecionado, buscamos TUDO dele
-      params = { paciente_id: pacienteId };
+      params = { paciente_id: pacienteId, status: ['Pendente', 'Atrasado', 'Pago'] };
     } else {
-      // Se NENHUM paciente (visão geral), buscamos SÓ o que está pendente/atrasado de TODOS
       params = { status: ['Pendente', 'Atrasado'] };
-      setParcelasPagas([]); // Limpa o histórico
-      setAbaAtiva('registrar'); // Força a aba de registro
+      setParcelasPagas([]);
+      setAbaAtiva('registrar');
     }
 
     try {
@@ -80,18 +83,16 @@ function Pagamentos() {
         params: params,
         paramsSerializer: {
           serialize: (params) => {
-            const parts = [];
-            for (const key in params) {
+            const query = new URLSearchParams();
+            Object.keys(params).forEach((key) => {
               const value = params[key];
               if (Array.isArray(value)) {
-                value.forEach(val => {
-                  parts.push(`${key}=${encodeURIComponent(val)}`);
-                });
+                value.forEach(v => query.append(key, v));
               } else {
-                parts.push(`${key}=${encodeURIComponent(value)}`);
+                query.append(key, value);
               }
-            }
-            return parts.join('&');
+            });
+            return query.toString();
           }
         }
       });
@@ -99,15 +100,13 @@ function Pagamentos() {
       const todasParcelas = response.data.results || response.data || [];
 
       if (pacienteId) {
-        // Se filtramos por paciente, separamos pagos e pendentes
         const pendentes = todasParcelas.filter(p => p.status === 'Pendente' || p.status === 'Atrasado');
         const pagas = todasParcelas.filter(p => p.status === 'Pago');
         setParcelasPendentes(pendentes);
         setParcelasPagas(pagas);
       } else {
-        // Se não filtramos (visão geral), todos são pendentes
         setParcelasPendentes(todasParcelas);
-        setParcelasPagas([]); // Garante que o histórico está vazio
+        setParcelasPagas([]); 
       }
 
     } catch (err) {
@@ -116,13 +115,13 @@ function Pagamentos() {
       setParcelasPendentes([]);
       setParcelasPagas([]);
       if (err.response && err.response.status === 401) {
-        alert('Sessão expirada. Faça login novamente.');
+        showToast('Sessão expirada. Faça login novamente.', 'error');
         navigate('/login');
       }
     } finally {
       setLoadingParcelas(false);
     }
-  }, [navigate]);
+  }, [navigate, showToast]);
   
   useEffect(() => {
     fetchPacientes();
@@ -152,11 +151,11 @@ function Pagamentos() {
 
   const handleSaveRecebimento = async (e) => {
     e.preventDefault();
-    if (!selectedParcela) { alert('Selecione uma parcela...'); return; }
+    if (!selectedParcela) { showToast('Selecione uma parcela...'); return; }
     const token = localStorage.getItem('access_token');
     const userId = localStorage.getItem('user_id');
-    if (!token || !userId) { alert('Erro de autenticação...'); navigate('/'); return; }
-    if (!recebimentoData.data_recebimento || !recebimentoData.valor_recebido || !recebimentoData.tipo) { alert('Preencha todos os campos...'); return; }
+    if (!token || !userId) { showToast('Erro de autenticação. Faça login novamente.', 'error'); navigate('/'); return; }
+    if (!recebimentoData.data_recebimento || !recebimentoData.valor_recebido || !recebimentoData.tipo) { showToast('Preencha todos os campos obrigatórios.', 'error'); return; }
     try {
       const dataParaBackend = {
         parcela: selectedParcela.id_parcela,
@@ -168,9 +167,19 @@ function Pagamentos() {
       await axios.post(`${API_BASE_URL}/api/recebimentos/`, dataParaBackend, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      alert('Recebimento registrado com sucesso!');
-      
-      fetchParcelas(selectedPacienteId || null); 
+      showToast('Recebimento registrado com sucesso!', 'success');
+
+      if (selectedPacienteId) {
+        fetchParcelas(selectedPacienteId);
+      } else {
+        fetchParcelas(null);
+      }
+
+      if (selectedPacienteId) {
+        setAbaAtiva('historico');
+      } else {
+        setAbaAtiva('registrar');
+      }
 
       setSelectedParcela(null);
       setRecebimentoData({ data_recebimento: '', valor_recebido: '', tipo: '' });
@@ -184,7 +193,7 @@ function Pagamentos() {
           } else if (responseData.detail) { errorMessage = responseData.detail;
           } else { errorMessage = JSON.stringify(responseData); }
       } else { errorMessage = err.message; }
-      alert(`Erro ao registrar recebimento: ${errorMessage}`);
+      showToast(`Erro ao registrar recebimento: ${errorMessage}`, 'error');
       setError(errorMessage);
     }
   };
@@ -197,7 +206,6 @@ function Pagamentos() {
   };
 
   const formatDateBR = (dateString) => {
-    // ... (código mantido) ...
     if (!dateString) return '-';
     try {
       return format(new Date(dateString + 'T00:00:00'), 'dd/MM/yyyy');
@@ -206,15 +214,11 @@ function Pagamentos() {
 
   return (
     <div className="pagamentos-container">
-      {/* 1. Seleção do Paciente / Filtro */}
       <div className="card-section">
-
-        {/* --- CORREÇÃO: Título com espaçamento (sem botão) --- */}
         <h2 style={{marginTop: 0, marginBottom: '1.5rem'}}>Controle de Pagamentos</h2>
 
         {error && <p className="error-message">{error}</p>}
 
-        {/* --- CORREÇÃO: Espaçamento (form-group já tem margin-bottom) --- */}
         <div className="form-group">
           <label 
             htmlFor="paciente"
@@ -239,10 +243,7 @@ function Pagamentos() {
           </select>
         </div>
       </div>
-
-      {/* 2. Container das Abas */}
       <>
-        {/* --- CORREÇÃO: Adicionado espaçamento (style) --- */}
         <div className="pagamentos-tabs-container" style={{marginTop: '1.5rem'}}>
           <button 
             className={`tab-button ${abaAtiva === 'registrar' ? 'active' : ''}`}
@@ -265,7 +266,6 @@ function Pagamentos() {
 
         {loadingParcelas && <div className="loading-message">Buscando parcelas...</div>}
 
-        {/* Aba 1: Registrar (Pendentes) */}
         <div style={{ display: abaAtiva === 'registrar' ? 'block' : 'none' }}>
           {modoDeExibicao === 'lista' && !loadingParcelas && (
             <div className="card-section">
@@ -317,7 +317,6 @@ function Pagamentos() {
             </div>
           )}
 
-          {/* Formulário de Pagamento */}
           {modoDeExibicao === 'formulario' && selectedParcela && (
             <div className="card-section">
               <h3>Registrar Pagamento da Parcela</h3>
@@ -422,7 +421,6 @@ function Pagamentos() {
           )}
         </div>
 
-        {/* Aba 2: Histórico (Pagos) */}
         {selectedPacienteId && (
           <div style={{ display: abaAtiva === 'historico' ? 'block' : 'none' }}>
             {!loadingParcelas && (
@@ -471,7 +469,6 @@ function Pagamentos() {
         )}
       </>
 
-      {/* --- CORREÇÃO: BOTÃO FLUTUANTE + TEXTO DO MODAL ATUALIZADO --- */}
       <button 
         className="floating-help-button" 
         onClick={() => setIsAjudaOpen(true)}

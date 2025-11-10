@@ -10,6 +10,35 @@ import { useToast } from '../context/ToastContext';
 
 const API_BASE_URL = 'http://localhost:8000';
 
+const validaCPF = (cpf) => {
+    if (!cpf) return false;
+    const cpfLimpo = String(cpf).replace(/\D/g, ''); 
+
+    if (cpfLimpo.length !== 11) return false;
+
+    if (/^(\d)\1{10}$/.test(cpfLimpo)) return false;
+
+    let soma = 0;
+    let resto;
+
+    for (let i = 1; i <= 9; i++) {
+        soma += parseInt(cpfLimpo.substring(i - 1, i)) * (11 - i);
+    }
+    resto = (soma * 10) % 11;
+    if (resto === 10 || resto === 11) resto = 0;
+    if (resto !== parseInt(cpfLimpo.substring(9, 10))) return false;
+
+    soma = 0;
+    for (let i = 1; i <= 10; i++) {
+        soma += parseInt(cpfLimpo.substring(i - 1, i)) * (12 - i);
+    }
+    resto = (soma * 10) % 11;
+    if (resto === 10 || resto === 11) resto = 0;
+    if (resto !== parseInt(cpfLimpo.substring(10, 11))) return false;
+
+    return true;
+};
+
 //Breadcrumbs
 const Breadcrumbs = ({ step }) => {
   
@@ -27,113 +56,154 @@ const Breadcrumbs = ({ step }) => {
         );
     };
 
-    const DadosPessoais = ({ onNext, data, onChange }) => {
-    const [ufs, setUfs] = useState([]);
-    const [cidades, setCidades] = useState([]);
+    const DadosPessoais = ({ onNext, data, onChange, showToast }) => {
+        const [ufs, setUfs] = useState([]);
+        const [cidades, setCidades] = useState([]);
+        const [isCidadesLoading, setIsCidadesLoading] = useState(false);
 
-    useEffect(() => {
-        const fetchUfs = async () => { try { const token = localStorage.getItem('access_token'); const response = await axios.get(`${API_BASE_URL}/api/ufs/`, { headers: { 'Authorization': `Bearer ${token}` } }); const ufsData = response.data.results || response.data || []; setUfs(ufsData); } catch (error) { console.error('Erro ao buscar UFs:', error); } }; fetchUfs();
-    }, []);
+        useEffect(() => {
+            const fetchUfs = async () => { try { const token = localStorage.getItem('access_token'); const response = await axios.get(`${API_BASE_URL}/api/ufs/`, { headers: { 'Authorization': `Bearer ${token}` } }); const ufsData = response.data.results || response.data || []; setUfs(ufsData); } catch (error) { console.error('Erro ao buscar UFs:', error); } }; fetchUfs();
+        }, []);
 
-    useEffect(() => {
-        if (data.uf) { const fetchCidades = async () => { try { const token = localStorage.getItem('access_token'); if (!token) return; const response = await axios.get(`${API_BASE_URL}/api/cidades/by_uf/?uf_id=${data.uf}`, { headers: { 'Authorization': `Bearer ${token}` } }); setCidades(response.data || []); } catch (error) { console.error('Erro ao buscar Cidades:', error); setCidades([]); } }; fetchCidades(); } else { setCidades([]); }
+        useEffect(() => {
+        if (data.uf) {
+        setIsCidadesLoading(true);
+        setCidades([]); 
+
+        const fetchCidades = async () => {
+            try {
+            const token = localStorage.getItem('access_token');
+            if (!token) return;
+            const response = await axios.get(`${API_BASE_URL}/api/cidades/by_uf/?uf_id=${data.uf}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            setCidades(response.data || []);
+            } catch (error) {
+            console.error('Erro ao buscar Cidades:', error);
+            setCidades([]);
+            } finally {
+            setIsCidadesLoading(false);
+            }
+        };
+        
+        fetchCidades();
+        } else {
+        setCidades([]);
+        setIsCidadesLoading(false);
+        }
     }, [data.uf]);
 
-    return (
-        <div className="dados-pessoais-container registro-tela">
-        
-        <h2 className="section-title">Dados Pessoais:</h2>
-        
-        <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: '1rem' }}>
-            Campos com * são obrigatórios.
-        </p>
+        const handleValidateAndNext = (e) => {
+        e.preventDefault();
 
-        <form onSubmit={(e) => { e.preventDefault(); onNext(); }}>
-            
-            <div className="form-group">
-            <label htmlFor="nome">Nome: *</label>
-            <input type="text" id="nome" name="nome" value={data.nome || ''}
-                onChange={onChange} className="input-field" required 
-                title="Nome completo do paciente."
-            />
-            </div>
-            
-            <div className="form-group-inline">
-            <div className="form-group">
-                <label htmlFor="cpf">CPF: *</label>
-                <input type="text" id="cpf" name="cpf" value={data.cpf || ''} onChange={onChange}
-                className="input-field" required 
-                title="CPF (apenas números)."
-                />
-            </div>
-            <div className="form-group">
-                <label htmlFor="data_nasc">Data de Nascimento: *</label>
-                <input type="date" id="data_nasc" name="data_nasc" value={data.data_nasc || ''}
-                onChange={onChange} className="input-field" required 
-                title="Data de nascimento do paciente."
-                />
-            </div>
-            </div>
-            
-            <div className="form-group">
-            <label htmlFor="telefone">Telefone:</label>
-            <input type="text" id="telefone" name="telefone" value={data.telefone || ''}
-                onChange={onChange} className="input-field" 
-                title="Telefone principal (Ex: (42) 99999-8888)."
-            />
-            </div>
+        if (!validaCPF(data.cpf)) {
+            showToast('CPF inválido! Por favor, verifique o número digitado.', 'error');
+            return;
+        }
+        onNext();
+    };
 
-            <div className="form-group-inline">
-            <div className="form-group">
-                <label htmlFor="uf">UF: *</label>
-                <select name="uf" id="uf" value={data.uf || ''} onChange={onChange}
-                className="input-field" required 
-                title="Selecione o estado (UF)."
-                >
-                <option value="">Selecione o Estado</option>
-                {ufs.map(uf => (
-                    <option key={uf.id_uf} value={uf.id_uf}>{uf.sigla_uf}</option>
-                ))}
-                </select>
-            </div>
-            <div className="form-group">
-                <label htmlFor="cidade">Cidade: *</label>
-                <select name="cidade" id="cidade" value={data.cidade || ''} onChange={onChange}
-                className="input-field" required disabled={!data.uf} 
-                title="Selecione a cidade (requer UF selecionada)."
-                >
-                <option value="">Selecione a Cidade</option>
-                {cidades.map(cidade => (
-                    <option key={cidade.id_cidade} value={cidade.id_cidade}>{cidade.nome_cidade}</option>
-                ))}
-                </select>
-            </div>
-            </div>
+        return (
+            <div className="dados-pessoais-container registro-tela">
             
-            <div className="form-group">
-            <label htmlFor="logradouro">Endereço (Rua, Nº): *</label>
-            <input type="text" id="logradouro" name="logradouro" value={data.logradouro || ''}
-                onChange={onChange} className="input-field" required 
-                title="Endereço (Rua, número, bairro, etc.)."
-            />
-            </div>
+            <h2 className="section-title">Dados Pessoais:</h2>
             
-            <div className="form-group">
-            <label htmlFor="email">Email:</label>
-            <input type="email" id="email" name="email" value={data.email || ''}
-                onChange={onChange} className="input-field" 
-                title="Email (opcional)."
-            />
+            <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: '1rem' }}>
+                Campos com * são obrigatórios.
+            </p>
+
+            <form onSubmit={handleValidateAndNext}>
+                
+                <div className="form-group">
+                <label htmlFor="nome">Nome: *</label>
+                <input type="text" id="nome" name="nome" value={data.nome || ''}
+                    onChange={onChange} className="input-field" required 
+                    title="Nome completo do paciente."
+                />
+                </div>
+                
+                <div className="form-group-inline">
+                <div className="form-group">
+                    <label htmlFor="cpf">CPF: *</label>
+                    <input type="text" id="cpf" name="cpf" value={data.cpf || ''} onChange={onChange}
+                    className="input-field" required 
+                    title="CPF (apenas números)."
+                    />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="data_nasc">Data de Nascimento: *</label>
+                    <input type="date" id="data_nasc" name="data_nasc" value={data.data_nasc || ''}
+                    onChange={onChange} className="input-field" required 
+                    title="Data de nascimento do paciente."
+                    />
+                </div>
+                </div>
+                
+                <div className="form-group">
+                <label htmlFor="telefone">Telefone:</label>
+                <input type="text" id="telefone" name="telefone" value={data.telefone || ''}
+                    onChange={onChange} className="input-field" 
+                    title="Telefone principal (Ex: (42) 99999-8888)."
+                />
+                </div>
+
+                <div className="form-group-inline">
+                <div className="form-group">
+                    <label htmlFor="uf">UF: *</label>
+                    <select name="uf" id="uf" value={data.uf || ''} onChange={onChange}
+                    className="input-field" required 
+                    title="Selecione o estado (UF)."
+                    >
+                    <option value="">Selecione o Estado</option>
+                    {ufs.map(uf => (
+                        <option key={uf.id_uf} value={uf.id_uf}>{uf.sigla_uf}</option>
+                    ))}
+                    </select>
+                </div>
+                <div className="form-group">
+                    <label htmlFor="cidade">Cidade: *</label>
+                        <select 
+                        name="cidade" 
+                        id="cidade" 
+                        value={data.cidade || ''} 
+                        onChange={onChange}
+                        className="input-field" 
+                        required 
+                        disabled={!data.uf || isCidadesLoading}
+                        title="Selecione a cidade (requer UF selecionada)."
+                    >
+                    <option value="">Selecione a Cidade</option>
+                    {cidades.map(cidade => (
+                        <option key={cidade.id_cidade} value={cidade.id_cidade}>{cidade.nome_cidade}</option>
+                    ))}
+                    </select>
+                </div>
+                </div>
+                
+                <div className="form-group">
+                <label htmlFor="logradouro">Endereço (Rua, Nº): *</label>
+                <input type="text" id="logradouro" name="logradouro" value={data.logradouro || ''}
+                    onChange={onChange} className="input-field" required 
+                    title="Endereço (Rua, número, bairro, etc.)."
+                />
+                </div>
+                
+                <div className="form-group">
+                <label htmlFor="email">Email:</label>
+                <input type="email" id="email" name="email" value={data.email || ''}
+                    onChange={onChange} className="input-field" 
+                    title="Email (opcional)."
+                />
+                </div>
+                
+                <div className="form-actions-full">
+                <button type="submit" className="button-primary" title="Salvar dados pessoais e ir para a próxima etapa.">
+                    Próximo
+                </button>
+                </div>
+            </form>
             </div>
-            
-            <div className="form-actions-full">
-            <button type="submit" className="button-primary" title="Salvar dados pessoais e ir para a próxima etapa.">
-                Próximo
-            </button>
-            </div>
-        </form>
-        </div>
-    );
+        );
     };
 
     const Anamnese1 = ({ onNext, onBack, data, onChange, showToast }) => {
@@ -397,11 +467,10 @@ const Breadcrumbs = ({ step }) => {
             Os dados do paciente e a anamnese foram preenchidos.
             </p>
             
-                {/* O BOTÃO AGORA CHAMA NOSSA NOVA FUNÇÃO 'handlePrint' */}
             <button 
             onClick={handlePrint} 
             className="imprimir-button"
-                    disabled={isSaving} // Só desabilita se estiver salvando
+                    disabled={isSaving}
             title="Gera uma versão para impressão da ficha de anamnese."
             >
             <FontAwesomeIcon icon={faPrint} /> 
@@ -443,9 +512,17 @@ const Breadcrumbs = ({ step }) => {
     const handleBack = () => setStep(prevStep => prevStep - 1);
 
     const handleInputChange = (e) => {
-        const { name, value, type, checked } = e.target;
-        const finalValue = type === 'checkbox' ? checked : value;
-        setFormData(prevData => ({ ...prevData, [name]: finalValue }));
+         const { name, value, type, checked } = e.target;
+         const finalValue = type === 'checkbox' ? checked : value;
+
+         setFormData(prevData => {
+             const newData = { ...prevData, [name]: finalValue };
+
+             if (name === 'uf') {
+               newData.cidade = ''; 
+            }
+            return newData;
+        });
     };
 
     const handleSave = async () => {
@@ -465,12 +542,12 @@ const Breadcrumbs = ({ step }) => {
             telefone: formData.telefone || null,
             logradouro: formData.logradouro,
             email: formData.email || null,
-            cidade: formData.cidade,
+            cidade_id: parseInt(formData.cidade, 10) || null,
         };
 
-        if (!pacienteData.nome || !pacienteData.cpf || !pacienteData.data_nasc || !pacienteData.cidade || !pacienteData.logradouro) {
+        if (!pacienteData.nome || !pacienteData.cpf || !pacienteData.data_nasc || !pacienteData.cidade_id || !pacienteData.logradouro) {
             showToast("Erro: Dados Pessoais obrigatórios estão faltando.", 'error');
-            setStep(1); // Manda o usuário de volta para a Etapa 1
+            setStep(1); 
             return false;
         }
         
@@ -533,7 +610,7 @@ const Breadcrumbs = ({ step }) => {
             return false;
         }
 
-        return true; // Sucesso
+        return true;
         
         } catch (err) { 
         if (err.response && err.response.status === 401) {
@@ -550,7 +627,7 @@ const Breadcrumbs = ({ step }) => {
     const renderStep = () => {
         switch (step) {
         case 1:
-            return <DadosPessoais onNext={handleNext} data={formData} onChange={handleInputChange} />;
+            return <DadosPessoais onNext={handleNext} data={formData} onChange={handleInputChange} showToast={showToast} />;
         case 2:
             return <Anamnese1 onNext={handleNext} onBack={handleBack} data={formData} onChange={handleInputChange} showToast={showToast} />;
         case 3:

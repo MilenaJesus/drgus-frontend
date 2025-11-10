@@ -11,7 +11,6 @@ import Modal from '../componentes/Modal';
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 function Inicio() {
-    // Estados
     const [consultasHoje, setConsultasHoje] = useState([]);
     const [pagamentosResumo, setPagamentosResumo] = useState({ totalPrevisto: 0, pendente: 0, vencido: 0 });
     const [notificacoesRecentes, setNotificacoesRecentes] = useState([]);
@@ -22,8 +21,6 @@ function Inicio() {
     const navigate = useNavigate();
     const [isAjudaOpen, setIsAjudaOpen] = useState(false);
 
-    //Funções de Busca
-    // Busca pacientes e retorna um mapa ID -> Nome
     const fetchPacientesMap = useCallback(async () => {
         try {
             const token = localStorage.getItem('access_token');
@@ -42,9 +39,7 @@ function Inicio() {
         }
     }, [navigate]);
 
-
-    // Busca consultas do dia, usando o mapa de pacientes
-    const fetchConsultasHoje = useCallback(async (pacMap) => { // Recebe o mapa
+    const fetchConsultasHoje = useCallback(async (pacMap) => {
         setLoadingConsultas(true);
         setError(null);
         try {
@@ -52,11 +47,9 @@ function Inicio() {
             if (!token) throw new Error('Token não encontrado.');
             
             const hoje = format(new Date(), 'yyyy-MM-dd');
-            // Busca consultas filtrando por data
             const response = await axios.get(`${API_BASE_URL}/api/agendamentos/?data_consulta=${hoje}`, { headers: { 'Authorization': `Bearer ${token}` } });
             const consultas = response.data.results || response.data || [];
             
-            // Adiciona o nome do paciente usando o pacMap
             const consultasComNomes = consultas.map(consulta => ({
                  ...consulta,
                  nome_paciente: pacMap[consulta.paciente] || `ID: ${consulta.paciente}` 
@@ -73,7 +66,6 @@ function Inicio() {
         }
     }, [navigate]);
 
-    // Busca parcelas e calcula resumo de pagamentos
     const fetchResumoPagamentos = useCallback(async () => {
         setLoadingPagamentos(true);
         setError(null);
@@ -84,10 +76,6 @@ function Inicio() {
         const hoje = new Date();
         const inicioMes = format(startOfMonth(hoje), 'yyyy-MM-dd');
         const fimMes = format(endOfMonth(hoje), 'yyyy-MM-dd');
-
-        // =============================================================
-        // CORREÇÃO: Trocado __gte por _after e __lte por _before
-        // =============================================================
         const responseMes = await axios.get(
             `${API_BASE_URL}/api/parcelas/?data_vencimento_after=${inicioMes}&data_vencimento_before=${fimMes}`, 
             { headers: { 'Authorization': `Bearer ${token}` } }
@@ -128,7 +116,6 @@ function Inicio() {
         }
     }, [navigate]);
 
-    // Busca notificações recentes não lidas
     const fetchNotificacoesRecentes = useCallback(async () => {
         setLoadingNotificacoes(true);
         setError(null);
@@ -145,8 +132,6 @@ function Inicio() {
         }
     }, [navigate]);
 
-
-    // Efeito principal para buscar todos os dados
     useEffect(() => {
         const carregarDashboard = async () => {
         setLoadingConsultas(true); setLoadingPagamentos(true); setLoadingNotificacoes(true);
@@ -154,15 +139,13 @@ function Inicio() {
         
         await Promise.all([
             fetchConsultasHoje(pacMap),
-            fetchResumoPagamentos(), // <-- Nome novo
+            fetchResumoPagamentos(),
             fetchNotificacoesRecentes()
         ]);
         };
         carregarDashboard();
     }, [fetchPacientesMap, fetchConsultasHoje, fetchResumoPagamentos, fetchNotificacoesRecentes]); 
 
-
-    // Função auxiliar para formatar tempo relativo
     const formatTempoAtras = (dateString) => {
          try {
              const date = new Date(dateString);
@@ -172,7 +155,6 @@ function Inicio() {
             return dateString; 
          }
     };
-
 
     return (
     <div className="dashboard-container">
@@ -249,8 +231,6 @@ function Inicio() {
                 <FontAwesomeIcon icon={faBell} />
                 <h2>Notificações</h2>
                 </div>
-                
-                {/* ... (lógica de loading/lista de notificações) ... */}
                 {loadingNotificacoes ? ( <p>Carregando notificações...</p> ) 
                 : notificacoesRecentes.length > 0 ? (
                 <div className="notification-list-simple">
@@ -296,7 +276,7 @@ function Inicio() {
                     <FontAwesomeIcon icon={faPlus} /> Nova consulta
                 </Link>
                 <Link 
-                    to="/orcamentos" 
+                    to="/orcamentos/novo" 
                     state={{ openNewModal: true }} 
                     className="quick-access-button"
                     title="Abrir a tela de criação de um novo orçamento." 

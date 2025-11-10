@@ -63,7 +63,7 @@ function ListaPacientes() {
       }
     } catch (err) {
       if (err.response && err.response.status === 401) {
-        alert('Sua sessão expirou. Por favor, faça o login novamente.');
+        showToast('Sua sessão expirou. Por favor, faça o login novamente.');
         navigate('/login');
       } else {
         setError('Não foi possível carregar os pacientes.');
@@ -72,7 +72,7 @@ function ListaPacientes() {
     } finally {
       setLoading(false);
     }
-  }, [navigate, limit, offset, searchTerm]);
+  }, [navigate, limit, offset, searchTerm, showToast]);
 
   useEffect(() => {
     fetchPacientes();
@@ -91,11 +91,11 @@ function ListaPacientes() {
       await axios.delete(`${API_BASE_URL}/api/pacientes/${pacienteParaExcluir.id_paciente}/`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-        showToast('Paciente excluído com sucesso!', 'success'); // <-- ADICIONE
+        showToast('Paciente excluído com sucesso!', 'success');
         fetchPacientes(); 
       } catch (err) {
         console.error("Erro ao excluir paciente:", err);
-       showToast('Não foi possível excluir o paciente.', 'error'); // <-- SUBSTITUA
+       showToast('Não foi possível excluir o paciente.', 'error');
      } finally {
       setIsDeleteModalOpen(false);
       setPacienteParaExcluir(null);

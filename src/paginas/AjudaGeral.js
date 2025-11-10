@@ -119,7 +119,7 @@ function AjudaGeral() {
       </div>
 
 
-      {/* Botão Flutuante de Ajuda (para a própria página) */}
+      {/*Botão Flutuante de Ajuda*/}
       <button 
         className="floating-help-button" 
         onClick={() => setIsAjudaOpen(true)}
@@ -128,7 +128,7 @@ function AjudaGeral() {
         <FontAwesomeIcon icon={faQuestionCircle} />
       </button>
 
-      {/* Modal de Ajuda */}
+      {/*Modal de Ajuda*/}
       <Modal
         isOpen={isAjudaOpen}
         onClose={() => setIsAjudaOpen(false)}

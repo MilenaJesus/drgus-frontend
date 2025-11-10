@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrashCan, faCheck, faQuestionCircle } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from 'react-router-dom';
 import Modal from '../componentes/Modal';
+import { useToast } from '../context/ToastContext';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 const dentesArcadaSuperior = [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28];
@@ -13,12 +14,14 @@ const mockFaces = ['V', 'P', 'M', 'D', 'L'];
 const mockParcelas = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
 function Orcamentos() {
+  const { showToast } = useToast();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [servicos, setServicos] = useState([]);
   const [pacientes, setPacientes] = useState([]);
   const [filtroPaciente, setFiltroPaciente] = useState('');
   const [pacienteSelecionadoId, setPacienteSelecionadoId] = useState('');
+  const [showAutocomplete, setShowAutocomplete] = useState(false);
   const navigate = useNavigate();
   const [isAjudaOpen, setIsAjudaOpen] = useState(false);
   const [selectedDente, setSelectedDente] = useState(null);
@@ -27,38 +30,86 @@ function Orcamentos() {
   const [procedimentoAjuda, setProcedimentoAjuda] = useState("");
   const [orcamentoForm, setOrcamentoForm] = useState({
     paciente_id: '',
-    data_orcamento: new Date().toISOString().split('T')[0], 
+    data_orcamento: new Date().toISOString().split('T')[0],
     parcelas: '',
   });
 
   const pacientesFiltrados = pacientes.filter(paciente =>
-    paciente.nome.toLowerCase().includes(filtroPaciente.toLowerCase())
+    (paciente.nome || '').toLowerCase().includes((filtroPaciente || '').toLowerCase())
   );
-  
-  // Função para selecionar o paciente
+
   const handleSelecionarPaciente = (paciente) => {
-      setFiltroPaciente(paciente.nome);
-      setPacienteSelecionadoId(paciente.id_paciente);
-  };
-  
-  // Função para limpar o paciente (se o usuário apagar o campo)
-  const handleFiltroChange = (e) => {
-      const nome = e.target.value;
-      setFiltroPaciente(nome);
-      if (pacientes.find(p => p.nome === nome)) {
-          // Mantém o ID se o nome for exato
-      } else {
-          setPacienteSelecionadoId(''); // Limpa o ID se a busca for alterada
-      }
+    const id = paciente?.id_paciente ?? paciente?.id ?? paciente?.pk ?? paciente?._id ?? '';
+    setFiltroPaciente(paciente.nome ?? '');
+    setPacienteSelecionadoId(String(id));
+    setOrcamentoForm(prev => ({ ...prev, paciente_id: String(id) }));
+    setShowAutocomplete(false);
   };
 
-  //Funções de Busca (fetchServicos, fetchPacientes) 
+  const handleFiltroChange = (e) => {
+    const nome = e.target.value ?? '';
+    setFiltroPaciente(nome);
+    setShowAutocomplete(nome.length > 0);
+    if (!pacientes.find(p => p.nome === nome)) {
+      setPacienteSelecionadoId('');
+      setOrcamentoForm(prev => ({ ...prev, paciente_id: '' }));
+    }
+  };
+
   const fetchServicos = useCallback(async () => {
-    try { const token = localStorage.getItem('access_token'); if (!token) throw new Error('Token...'); const response = await axios.get(`${API_BASE_URL}/api/servicos/`, { headers: { 'Authorization': `Bearer ${token}` } }); const services = response.data.results || response.data || []; if (Array.isArray(services)) { setServicos(services); } else { setServicos([]); } } catch (err) { if (err.response && err.response.status === 401){ navigate('/login'); } else { setError('Erro serviços.'); console.error('Erro serv:', err);}}
+    try {
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        console.error("fetchServicos: Token não encontrado. Redirecionando para login.");
+        navigate('/login');
+        return;
+      }
+      const response = await axios.get(`${API_BASE_URL}/api/servicos/`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const services = response.data?.results ?? response.data ?? [];
+      setServicos(Array.isArray(services) ? services : []);
+    } catch (err) {
+      if (err?.response?.status === 401) navigate('/login');
+      else {
+        setError('Erro ao carregar serviços.');
+        console.error('Erro serv (API):', err.response || err);
+      }
+    }
   }, [navigate]);
 
   const fetchPacientes = useCallback(async () => {
-    try { const token = localStorage.getItem('access_token'); if (!token) throw new Error('Token...'); const response = await axios.get(`${API_BASE_URL}/api/pacientes/lookup/`, { headers: { 'Authorization': `Bearer ${token}` } }); const patients = response.data.results || response.data || []; if (Array.isArray(patients)) { setPacientes(patients); } else { setPacientes([]); } } catch (err) { if (err.response && err.response.status === 401){ navigate('/login'); } else { setError('Erro pacientes.'); console.error('Erro pac:', err);}}
+    try {
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        console.error("fetchPacientes: Token não encontrado. Redirecionando para login.");
+        navigate('/login');
+        return;
+      }
+      const response = await axios.get(`${API_BASE_URL}/api/pacientes/lookup/`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const patients = response.data?.results ?? response.data ?? [];
+      if (Array.isArray(patients)) {
+        const pacientesCorrigidos = patients.map((p, idx) => ({
+          ...p,
+          id_paciente: String(p?.id_paciente ?? p?.id ?? p?.pk ?? p?._id ?? `no-id-${idx}`),
+          nome: p?.nome ?? '',
+          cpf: p?.cpf ?? '',
+        }));
+        setPacientes(pacientesCorrigidos);
+      } else {
+        setPacientes([]);
+      }
+    } catch (err) {
+      if (err?.response?.status === 401) {
+        console.error("fetchPacientes: Sessão expirada (401). Redirecionando.");
+        navigate('/login');
+      } else {
+        setError('Erro ao carregar pacientes.');
+        console.error('Erro pac (API):', err.response || err);
+      }
+    }
   }, [navigate]);
 
   useEffect(() => {
@@ -70,10 +121,9 @@ function Orcamentos() {
     initData();
   }, [fetchServicos, fetchPacientes]);
 
-  //Handlers (Formulário, Dente, Face, etc.)
   const handleOrcamentoFormChange = (e) => {
     const { name, value } = e.target;
-    setOrcamentoForm(prev => ({ ...prev, [name]: value }));
+    setOrcamentoForm(prev => ({ ...prev, [name]: value ?? '' }));
   };
 
   const handleDenteClick = (dente) => {
@@ -95,45 +145,34 @@ function Orcamentos() {
   };
 
   const handleProcedimentoChange = (e) => {
-    const servicold = e.target.value;
-    const servicoSelecionado = servicos.find(s => s.id_servico === parseInt(servicold));
-    const novoValor = servicoSelecionado ? servicoSelecionado.valor_referencia : '';
-    
+    const servicold = e.target.value ?? '';
+    const servicoSelecionado = servicos.find(s => String(s.id_servico) === String(servicold));
+    const novoValor = servicoSelecionado ? (servicoSelecionado.valor_referencia ?? '') : '';
     setProcedimentoData(prevData => ({
       ...prevData,
       servico: servicold,
-      valor: novoValor,
+      valor: novoValor ?? '',
       dente: (servicoSelecionado && servicoSelecionado.exige_dente) ? prevData.dente : '',
       faces: (servicoSelecionado && servicoSelecionado.exige_face) ? prevData.faces : [],
     }));
-
-    if (servicoSelecionado && !servicoSelecionado.exige_dente) {
-      setSelectedDente(null);
-    }
+    if (servicoSelecionado && !servicoSelecionado.exige_dente) setSelectedDente(null);
 
     if (servicoSelecionado) {
-      if (servicoSelecionado.exige_dente && servicoSelecionado.exige_face) {
-        setProcedimentoAjuda("Este procedimento exige a seleção de Dente e Faces.");
-      } else if (servicoSelecionado.exige_dente) {
-        setProcedimentoAjuda("Este procedimento exige a seleção de Dente.");
-      } else if (servicoSelecionado.exige_face) {
-        setProcedimentoAjuda("Este procedimento exige a seleção de Faces.");
-      } else {
-        setProcedimentoAjuda(""); // Limpa se não exigir nada
-      }
-    } else {
-      setProcedimentoAjuda(""); // Limpa se nenhum procedimento for selecionado
-    }
+      if (servicoSelecionado.exige_dente && servicoSelecionado.exige_face) setProcedimentoAjuda("Este procedimento exige a seleção de Dente e Faces.");
+      else if (servicoSelecionado.exige_dente) setProcedimentoAjuda("Este procedimento exige a seleção de Dente.");
+      else if (servicoSelecionado.exige_face) setProcedimentoAjuda("Este procedimento exige a seleção de Faces.");
+      else setProcedimentoAjuda("");
+    } else setProcedimentoAjuda("");
   };
 
   const handleAdicionarProcedimento = () => {
-    const servicoSelecionado = servicos.find(s => s.id_servico === parseInt(procedimentoData.servico));
-    if (!servicoSelecionado) { alert('Selecione um procedimento válido.'); return; }
+    const servicoSelecionado = servicos.find(s => String(s.id_servico) === String(procedimentoData.servico));
+    if (!servicoSelecionado) { showToast('Selecione um procedimento válido.'); return; }
     const exigeDente = servicoSelecionado.exige_dente;
     const exigeFace = servicoSelecionado.exige_face;
     const denteValido = !exigeDente || (procedimentoData.dente && procedimentoData.dente !== '');
     const faceValida = !exigeFace || (procedimentoData.faces && procedimentoData.faces.length > 0);
-    if (denteValido && faceValida && procedimentoData.servico && procedimentoData.valor) {
+    if (denteValido && faceValida && procedimentoData.servico && (procedimentoData.valor !== undefined && procedimentoData.valor !== '')) {
       const novoProcedimento = {
         idTemporario: Date.now(),
         dente: procedimentoData.dente || null,
@@ -142,7 +181,7 @@ function Orcamentos() {
         valor: procedimentoData.valor,
         nomeServico: servicoSelecionado.desc_servico
       };
-      setProcedimentosDoOrcamento([...procedimentosDoOrcamento, novoProcedimento]);
+      setProcedimentosDoOrcamento(prev => [...prev, novoProcedimento]);
       setProcedimentoData({ dente: '', faces: [], servico: '', valor: '' });
       setSelectedDente(null);
       setProcedimentoAjuda("");
@@ -151,7 +190,7 @@ function Orcamentos() {
       if (exigeDente && !denteValido) errorMsg += '- Selecione um dente.\n';
       if (exigeFace && !faceValida) errorMsg += '- Selecione pelo menos uma face.\n';
       if (!procedimentoData.servico) errorMsg += '- Selecione um procedimento.\n';
-      alert(errorMsg);
+      showToast(errorMsg);
     }
   };
 
@@ -170,17 +209,16 @@ function Orcamentos() {
     try {
       const token = localStorage.getItem('access_token');
       if (!token) { throw new Error('Token de autenticação não encontrado.'); }
-      if (!orcamentoForm.paciente_id) { alert('Por favor, selecione um paciente.'); return; }
-      if (procedimentosDoOrcamento.length === 0) { alert('Adicione pelo menos um procedimento.'); return; }
+      if (!pacienteSelecionadoId) { showToast('Por favor, selecione um paciente.'); return; }
+      if (procedimentosDoOrcamento.length === 0) { showToast('Adicione pelo menos um procedimento.'); return; }
 
       const orcamentoData = {
-        paciente: parseInt(orcamentoForm.paciente_id),
+        paciente: parseInt(pacienteSelecionadoId),
         data_orcamento: orcamentoForm.data_orcamento,
         n_vezes: orcamentoForm.parcelas ? parseInt(orcamentoForm.parcelas) : null,
-        
-        itens_para_criar: procedimentosDoOrcamento.map(proc => ({ 
+        itens_para_criar: procedimentosDoOrcamento.map(proc => ({
           servico: parseInt(proc.servico),
-          data_execucao: new Date().toISOString().split('T')[0], 
+          data_execucao: new Date().toISOString().split('T')[0],
           valor: parseFloat(proc.valor),
           n_dente: proc.dente || null,
           face: proc.faces || null,
@@ -190,18 +228,20 @@ function Orcamentos() {
       await axios.post(`${API_BASE_URL}/api/orcamentos/`, orcamentoData, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      alert('Orçamento salvo com sucesso! As parcelas foram geradas (se aplicável).');
-      
+
+      showToast('Orçamento salvo com sucesso! As parcelas foram geradas.');
       setProcedimentosDoOrcamento([]);
       setOrcamentoForm({ paciente_id: '', data_orcamento: new Date().toISOString().split('T')[0], parcelas: '' });
+      setPacienteSelecionadoId('');
+      setFiltroPaciente('');
     } catch (err) {
       const errorMsg = err.response?.data ? JSON.stringify(err.response.data) : err.message;
-      alert(`Erro ao salvar o orçamento: ${errorMsg}`);
+      showToast(`Erro ao salvar o orçamento: ${errorMsg}`);
       console.error('Erro ao salvar orçamento:', err.response ? err.response.data : err);
     }
   };
 
-  const servicoSelecionado = servicos.find(s => s.id_servico === parseInt(procedimentoData.servico));
+  const servicoSelecionado = servicos.find(s => String(s.id_servico) === String(procedimentoData.servico));
   const exigeDente = servicoSelecionado?.exige_dente;
   const exigeFace = servicoSelecionado?.exige_face;
 
@@ -211,7 +251,7 @@ function Orcamentos() {
   return (
     <div className="orcamento-container">
       {error && <p className="error-message">{error}</p>}
-      
+
       <form onSubmit={handleSaveOrcamento}>
         <div className="orcamento-content-wrapper">
           <div className="orcamento-details-section">
@@ -220,51 +260,51 @@ function Orcamentos() {
               <div className="form-group" style={{ position: 'relative' }}>
                 <label htmlFor="filtroPaciente">Paciente *</label>
                 <input
+                  autoComplete="off"
                   type="text"
                   id="filtroPaciente"
                   className="input-field"
                   placeholder="Digite o nome para buscar o paciente..."
                   value={filtroPaciente}
                   onChange={handleFiltroChange}
+                  onFocus={() => setShowAutocomplete(filtroPaciente.length > 0)}
                   required
                   title="Busque pelo nome do paciente para quem o orçamento será criado."
                 />
 
-                {filtroPaciente.length > 0 && pacienteSelecionadoId === '' && pacientesFiltrados.length > 0 && (
-                  <ul className="paciente-autocomplete-list">
-                    {pacientesFiltrados.slice(0, 8).map(paciente => ( 
-                      <li
-                        key={paciente.id_paciente}
-                        onClick={() => handleSelecionarPaciente(paciente)} 
-                        title={`Selecionar ${paciente.nome}`}
-                      >
-                        {paciente.nome} ({paciente.cpf})
-                      </li>
-                    ))}
+                {showAutocomplete && filtroPaciente.length > 0 && pacientesFiltrados.length > 0 && (
+                  <ul className="paciente-autocomplete-list" role="listbox">
+                    {pacientesFiltrados.slice(0, 8).map((paciente, idx) => {
+                      const keySafe = paciente.id_paciente ?? paciente.cpf ?? `${paciente.nome}-${idx}`;
+                      return (
+                        <li
+                          key={keySafe}
+                          onMouseDown={() => handleSelecionarPaciente(paciente)}
+                          title={`Selecionar ${paciente.nome}`}
+                          role="option"
+                          tabIndex={0}
+                        >
+                          {paciente.nome} ({paciente.cpf ?? ''})
+                        </li>
+                      );
+                    })}
                     {pacientesFiltrados.length > 8 && (
                       <li className="autocomplete-info">Mais resultados...</li>
                     )}
                   </ul>
                 )}
 
-                {/* MENSAGEM DE ERRO (Se digitou e não achou) */}
-                {pacientesFiltrados.length === 0 && filtroPaciente.length > 0 && pacienteSelecionadoId === '' && (
+                {/*Mensagem de erro se digitou e não achou*/}
+                {showAutocomplete && pacientesFiltrados.length === 0 && filtroPaciente.length > 0 && (
                   <div className="autocomplete-info" style={{ color: '#dc3545' }}>
                     Nenhum paciente encontrado.
                   </div>
                 )}
-                
-                {/* TAG DE PACIENTE SELECIONADO */}
-                {pacienteSelecionadoId && (
-                  <div className="paciente-selecionado-tag">
-                    Paciente Selecionado: <strong>{pacientes.find(p => p.id_paciente === pacienteSelecionadoId)?.nome || filtroPaciente}</strong>
-                  </div>
-                )}
 
-                {/* Campo Oculto (para submeter o ID correto no formulário) */}
-                <input type="hidden" name="paciente_id" value={pacienteSelecionadoId} onChange={handleOrcamentoFormChange} />
+                {/*Campo oculto para submissão*/}
+                <input type="hidden" name="paciente_id" value={pacienteSelecionadoId ?? ''} />
               </div>
-              
+
               <div className="form-group">
                 <label htmlFor="data">Data *</label>
                 <input type="date" id="data" name="data_orcamento" value={orcamentoForm.data_orcamento}
@@ -286,19 +326,19 @@ function Orcamentos() {
               <div className="odontograma-grid">
                 <div className="arcada-numeros-superior">{dentesArcadaSuperior.map(d => <span key={d}>{d}</span>)}</div>
                 <div className="arcada-superior">{dentesArcadaSuperior.map(d => (
-                  <div 
-                    key={d} 
-                    className={`dente-box ${selectedDente === d ? 'selected' : ''}`} 
+                  <div
+                    key={d}
+                    className={`dente-box ${selectedDente === d ? 'selected' : ''}`}
                     onClick={() => exigeDente && handleDenteClick(d)}
-                    title={exigeDente ? `Selecionar dente ${d}` : "Selecione um procedimento que exija dente."} 
+                    title={exigeDente ? `Selecionar dente ${d}` : "Selecione um procedimento que exija dente."}
                   ></div>
                 ))}</div>
                 <div className="arcada-inferior">{dentesArcadaInferior.map(d => (
-                  <div 
-                    key={d} 
-                    className={`dente-box ${selectedDente === d ? 'selected' : ''}`} 
+                  <div
+                    key={d}
+                    className={`dente-box ${selectedDente === d ? 'selected' : ''}`}
                     onClick={() => exigeDente && handleDenteClick(d)}
-                    title={exigeDente ? `Selecionar dente ${d}` : "Selecione um procedimento que exija dente."} 
+                    title={exigeDente ? `Selecionar dente ${d}` : "Selecione um procedimento que exija dente."}
                   ></div>
                 ))}</div>
                 <div className="arcada-numeros-inferior">{dentesArcadaInferior.map(d => <span key={d}>{d}</span>)}</div>
@@ -311,13 +351,13 @@ function Orcamentos() {
               </div>
               <div className="faces-container">
                 {mockFaces.map(face => (
-                  <button 
-                    type="button" 
-                    key={face} 
-                    disabled={!exigeFace} 
-                    className={`face-button ${procedimentoData.faces.includes(face) ? 'selected' : ''}`} 
+                  <button
+                    type="button"
+                    key={face}
+                    disabled={!exigeFace}
+                    className={`face-button ${procedimentoData.faces.includes(face) ? 'selected' : ''}`}
                     onClick={() => exigeFace && handleFaceClick(face)}
-                    title={exigeFace ? `Selecionar face ${face}` : "Selecione um procedimento que exija faces."} 
+                    title={exigeFace ? `Selecionar face ${face}` : "Selecione um procedimento que exija faces."}
                   >
                     <div className="face-circle"><FontAwesomeIcon icon={faCheck} className="face-icon" /></div>
                     <span>{face}</span>
@@ -327,16 +367,16 @@ function Orcamentos() {
               <div className="procedimento-inputs stacked">
                 <div className="form-group">
                   <label htmlFor="procedimento">Procedimento *</label>
-                  <select 
-                    name="procedimento" 
-                    id="procedimento" 
-                    value={procedimentoData.servico} 
-                    onChange={handleProcedimentoChange} 
+                  <select
+                    name="procedimento"
+                    id="procedimento"
+                    value={procedimentoData.servico}
+                    onChange={handleProcedimentoChange}
                     className="select-field"
-                    title="Escolha o serviço a ser realizado." 
+                    title="Escolha o serviço a ser realizado."
                   >
                     <option value="">Selecione</option>
-                    {servicos.map(s => (<option key={s.id_servico} value={s.id_servico}>{s.desc_servico}</option>))}
+                    {servicos.map(s => (<option key={String(s.id_servico)} value={String(s.id_servico)}>{s.desc_servico}</option>))}
                   </select>
                   {procedimentoAjuda && (
                     <p className="procedimento-ajuda-texto">{procedimentoAjuda}</p>
@@ -344,22 +384,22 @@ function Orcamentos() {
                 </div>
                 <div className="form-group">
                   <label htmlFor="valor">Valor (R$) *</label>
-                  <input 
-                    type="text" 
-                    id="valor" 
-                    name="valor" 
-                    value={procedimentoData.valor} 
-                    readOnly 
+                  <input
+                    type="text"
+                    id="valor"
+                    name="valor"
+                    value={procedimentoData.valor ?? ''}
+                    readOnly
                     className="input-field input-field-readonly"
-                    title="O valor é preenchido automaticamente com base no procedimento selecionado." 
+                    title="O valor é preenchido automaticamente com base no procedimento selecionado."
                   />
                 </div>
               </div>
-              <button 
-                type="button" 
-                className="add-button" 
+              <button
+                type="button"
+                className="add-button"
                 onClick={handleAdicionarProcedimento}
-                title="Adicionar o procedimento selecionado à lista abaixo." 
+                title="Adicionar o procedimento selecionado à lista abaixo."
               >
                 Adicionar ao orçamento
               </button>
@@ -381,18 +421,18 @@ function Orcamentos() {
                     </tr>
                   </thead>
                   <tbody>
-                    {procedimentosDoOrcamento.map((item, index) => (
+                    {procedimentosDoOrcamento.map((item) => (
                       <tr key={item.idTemporario}>
                         <td>{item.dente || '-'}</td>
                         <td>{item.faces || '-'}</td>
                         <td>{item.nomeServico}</td>
-                        <td>{parseFloat(item.valor).toFixed(2)}</td>
+                        <td>{(parseFloat(item.valor || 0)).toFixed(2)}</td>
                         <td>
-                          <button 
-                            type="button" 
-                            className="remove-button" 
+                          <button
+                            type="button"
+                            className="remove-button"
                             onClick={() => handleRemoverProcedimento(item.idTemporario)}
-                            title="Remover este procedimento da lista." 
+                            title="Remover este procedimento da lista."
                           >
                             <FontAwesomeIcon icon={faTrashCan} />
                           </button>
@@ -405,25 +445,25 @@ function Orcamentos() {
             ) : (
               <p className='no-data-message' style={{textAlign: 'center'}}>Nenhum procedimento adicionado ainda.</p>
             )}
-            
+
             <div className="orcamento-footer">
               <div className="form-row-compact total-row">
                 <div className="form-group">
                   <label htmlFor="total">Total estimado: </label>
-                  <input type="text" id="total" value={`R$ ${calcularTotalEstimado()}`} readOnly 
-                    className="input-field input-field-readonly" 
-                    title="Soma total dos procedimentos listados." 
+                  <input type="text" id="total" value={`R$ ${calcularTotalEstimado()}`} readOnly
+                    className="input-field input-field-readonly"
+                    title="Soma total dos procedimentos listados."
                   />
                 </div>
                 <div className="form-group">
                   <label htmlFor="parcelas">N° de parcelas</label>
-                  <select 
-                    id="parcelas" 
-                    name="parcelas" 
+                  <select
+                    id="parcelas"
+                    name="parcelas"
                     className="select-field"
-                    value={orcamentoForm.parcelas} 
+                    value={orcamentoForm.parcelas}
                     onChange={handleOrcamentoFormChange}
-                    title="Selecione o número de parcelas para gerar o financeiro deste orçamento (opcional)." 
+                    title="Selecione o número de parcelas para gerar o financeiro deste orçamento (opcional)."
                   >
                     <option value="">Selecione (para gerar parcelas)</option>
                     {mockParcelas.map((num, index) => (
@@ -434,10 +474,10 @@ function Orcamentos() {
                 <div className="form-group">
                 </div>
               </div>
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="button-save"
-                title="Salvar este orçamento no histórico do paciente." 
+                title="Salvar este orçamento no histórico do paciente."
               >
                 Salvar orçamento
               </button>
@@ -445,9 +485,9 @@ function Orcamentos() {
           </div>
         </div>
       </form>
-      
-      <button 
-        className="floating-help-button" 
+
+      <button
+        className="floating-help-button"
         onClick={() => setIsAjudaOpen(true)}
         title="Ajuda sobre esta página"
       >
@@ -459,8 +499,8 @@ function Orcamentos() {
         onClose={() => setIsAjudaOpen(false)}
         titulo="Ajuda - Criar Orçamento"
         footer={
-          <button 
-            className="modal-button modal-button-secondary" 
+          <button
+            className="modal-button modal-button-secondary"
             onClick={() => setIsAjudaOpen(false)}
           >
             Fechar

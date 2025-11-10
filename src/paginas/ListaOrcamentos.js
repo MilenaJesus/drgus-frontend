@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './ListaOrcamentos.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faEye, faQuestionCircle} from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faEye, faQuestionCircle, faTrashCan} from '@fortawesome/free-solid-svg-icons';
 import Modal from '../componentes/Modal';
 import { useToast } from '../context/ToastContext';
 
@@ -62,7 +62,7 @@ function ListaOrcamentos() {
 
     } catch (err) {
       if (err.response && err.response.status === 401) {
-        alert('Sua sessão expirou.');
+        showToast('Sua sessão expirou.');
         navigate('/login');
       } else {
         setError('Não foi possível carregar os orçamentos.');
@@ -70,7 +70,7 @@ function ListaOrcamentos() {
     } finally {
       setLoading(false);
     }
-  }, [navigate, filtroPaciente, filtroStatus, limit, offset]);
+  }, [navigate, filtroPaciente, filtroStatus, limit, offset, showToast]);
 
   useEffect(() => {
     fetchOrcamentos();
@@ -90,7 +90,7 @@ function ListaOrcamentos() {
       setOrcamentos(orcamentosAtuais =>
         orcamentosAtuais.map(orc =>
           orc.id_orcamento === orcamentoId
-            ? { ...orc, data_aprovacao: hoje, status_tratamento: 'Aprovado' } // Atualiza o item
+            ? { ...orc, data_aprovacao: hoje, status_tratamento: 'Aprovado' }
             : orc 
         )
       );
@@ -99,6 +99,31 @@ function ListaOrcamentos() {
 
     } catch (err) {
       showToast('Erro ao aprovar o orçamento.', 'error');
+    }
+  };
+
+  const handleDeleteOrcamento = async (orcamentoId) => {
+    if (!window.confirm("Tem certeza que deseja excluir este orçamento? Esta ação não pode ser desfeita.")) {
+        return;
+    }
+
+    try {
+        const token = localStorage.getItem('access_token');
+        if (!token) throw new Error('Token não encontrado.');
+
+        await axios.delete(`${API_BASE_URL}/api/orcamentos/${orcamentoId}/`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        showToast('Orçamento excluído com sucesso.', 'success');
+        setOrcamentos(orcamentosAtuais =>
+            orcamentosAtuais.filter(orc => orc.id_orcamento !== orcamentoId)
+        );
+        setTotalOrcamentos(prevTotal => prevTotal - 1);
+
+    } catch (err) {
+        console.error('Erro ao excluir orçamento:', err);
+        showToast(err.response?.data?.detail || 'Erro ao excluir o orçamento.', 'error');
     }
   };
 
@@ -217,13 +242,22 @@ function ListaOrcamentos() {
                       </button>
                       
                       {!orc.data_aprovacao && orc.status_tratamento === "Aguardando Aprovação" && (
-                        <button 
-                          className="action-button action-button-aprovar"
-                          title="Marcar este orçamento como aprovado."
-                          onClick={() => handleAprovarOrcamento(orc.id_orcamento)}
-                        >
-                          Aprovar
-                        </button>
+                          <> 
+                            <button 
+                            className="action-button action-button-aprovar"
+                            title="Marcar este orçamento como aprovado."
+                            onClick={() => handleAprovarOrcamento(orc.id_orcamento)}
+                            >
+                              Aprovar
+                            </button>
+                            <button 
+                              className="action-button action-button-excluir"
+                              title="Excluir este orçamento."
+                              onClick={() => handleDeleteOrcamento(orc.id_orcamento)}
+                            >
+                              <FontAwesomeIcon icon={faTrashCan} />
+                            </button>
+                          </>
                       )}
                     </td>
                   </tr>

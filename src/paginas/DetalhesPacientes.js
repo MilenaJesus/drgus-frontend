@@ -5,10 +5,12 @@ import './DetalhesPacientes.css';
 import Modal from '../componentes/Modal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faQuestionCircle } from '@fortawesome/free-solid-svg-icons';
+import { useToast } from '../context/ToastContext';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 function DetalhesPacientes() {
+  const { showToast } = useToast();
   const { id } = useParams();
   const navigate = useNavigate();
   
@@ -55,7 +57,7 @@ function DetalhesPacientes() {
         
       } catch (err) {
         if (err.response && err.response.status === 401) { 
-          alert('Sua sessão expirou...');
+          showToast('Sua sessão expirou...');
           navigate('/login'); 
         } else { 
           setError('Não foi possível carregar os detalhes do paciente.');
@@ -66,7 +68,7 @@ function DetalhesPacientes() {
       }
     };
     fetchDados();
-  }, [id, navigate]);
+  }, [id, navigate, showToast]);
   
   const toggleDetalhesOrcamento = (orcamentoId) => {
     setOrcamentoExpandidoId(idAtual => 
