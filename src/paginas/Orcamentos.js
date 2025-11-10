@@ -64,7 +64,8 @@ function Orcamentos() {
         navigate('/login');
         return;
       }
-      const response = await axios.get(`${API_BASE_URL}/api/servicos/`, {
+      const urlComFiltro = `${API_BASE_URL}/api/servicos/?ativo=true`;
+      const response = await axios.get(urlComFiltro, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const services = response.data?.results ?? response.data ?? [];
@@ -277,14 +278,13 @@ function Orcamentos() {
                     {pacientesFiltrados.slice(0, 8).map((paciente, idx) => {
                       const keySafe = paciente.id_paciente ?? paciente.cpf ?? `${paciente.nome}-${idx}`;
                       return (
-                        
                         <li
                           key={keySafe}
                           onMouseDown={() => handleSelecionarPaciente(paciente)}
                           title={`Selecionar ${paciente.nome}`}
                           role="option"
-                          aria-selected={pacienteSelecionadoId === String(paciente.id_paciente)}
                           tabIndex={0}
+                          aria-selected={String(paciente.id_paciente) === pacienteSelecionadoId}
                         >
                           {paciente.nome} ({paciente.cpf ?? ''})
                         </li>

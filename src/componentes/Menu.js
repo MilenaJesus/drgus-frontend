@@ -100,6 +100,12 @@ function Sidebar({ onLogout }) {
                             </Link>
                         </li>
                         <li>
+                            <Link to="/procedimentos" onClick={isMobile ? toggleMenu : null} className={isLinkActive('/procedimentos') ? 'active' : ''}>
+                                <i className='bx bx-pencil'></i>
+                                <span>Procedimentos</span>
+                            </Link>
+                        </li>
+                        <li>
                             <Link to="/pagamentos" onClick={isMobile ? toggleMenu : null} className={isLinkActive('/pagamentos') ? 'active' : ''}>
                                 <i className='bx bxs-credit-card-alt'></i>
                                 <span>Pagamentos</span>

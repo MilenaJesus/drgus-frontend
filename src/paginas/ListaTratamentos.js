@@ -15,6 +15,7 @@ function ListaTratamentos() {
     const [error, setError] = useState(null);
     const navigate = useNavigate();
     const { showToast } = useToast();
+    const [selectedTratamento, setSelectedTratamento] = useState(null);
 
     const [filtroPaciente, setFiltroPaciente] = useState('');
     const [filtroStatus, setFiltroStatus] = useState('');
@@ -99,8 +100,47 @@ function ListaTratamentos() {
             const erroMsg = err.response?.data?.error || 'Não foi possível iniciar o tratamento.';
             showToast(erroMsg, 'error');
         }
-        };
+    };
 
+    const handleConcluirItem = async (itemId) => {
+        const tratamentoId = selectedTratamento.id_tratamento;
+        if (!tratamentoId) return;
+
+        try {
+            const token = localStorage.getItem('access_token');
+            const url = `${API_BASE_URL}/api/itens/${itemId}/concluir/`; 
+
+            const response = await axios.patch(url, {}, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            const itemAtualizado = response.data;
+            setTratamentos(listaAntiga => 
+                listaAntiga.map(trat => {
+                    if (trat.id_tratamento !== tratamentoId) return trat;
+                    
+                    const itensNovos = trat.orcamento.itens.map(item => 
+                        item.id_item === itemAtualizado.id_item ? itemAtualizado : item
+                    );
+                    
+                    return { ...trat, orcamento: { ...trat.orcamento, itens: itensNovos }};
+                })
+            );
+
+            setSelectedTratamento(tratamentoAntigo => {
+                const itensNovos = tratamentoAntigo.orcamento.itens.map(item =>
+                    item.id_item === itemAtualizado.id_item ? itemAtualizado : item
+                );
+                return { ...tratamentoAntigo, orcamento: { ...tratamentoAntigo.orcamento, itens: itensNovos }};
+            });
+
+            showToast('Procedimento marcado como concluído!', 'success');
+
+        } catch (error) {
+            console.error("Erro ao concluir item:", error.response || error);
+            showToast('Falha ao atualizar o procedimento.', 'error');
+        }
+    };
 
     const handleEncerrarTratamento = async (tratamentoId) => {
         const token = localStorage.getItem('access_token');
@@ -126,10 +166,16 @@ function ListaTratamentos() {
         }
     };
 
-    const toggleDetalhesTratamento = (tratamentoId) => {
-        setItemExpandidoId(idAtual => 
-        idAtual === tratamentoId ? null : tratamentoId
-        );
+    const toggleDetalhesTratamento = (tratamento) => {
+        const novoIdExpandido = itemExpandidoId === tratamento.id_tratamento ? null : tratamento.id_tratamento;
+
+        setItemExpandidoId(novoIdExpandido);
+
+        if (novoIdExpandido !== null) {
+        setSelectedTratamento(tratamento);
+        } else {
+        setSelectedTratamento(null);
+        }
     };
 
     const handleNextPage = () => {
@@ -200,7 +246,7 @@ function ListaTratamentos() {
                 ) : tratamentos.length > 0 ? (
                     tratamentos.map((trat) => (
                         <React.Fragment key={trat.id_tratamento}>
-                        <tr style={{backgroundColor: itemExpandidoId === trat.id_tratamento ? '#f0f8ff' : '#fff'}}>
+                        <tr>
                             <td>{trat.id_tratamento}</td>
                             <td>
                                 <Link 
@@ -213,8 +259,7 @@ function ListaTratamentos() {
                             </td>
                             <td>{formatDate(trat.data_ini_trat)}</td>
                             <td>
-                                <span 
-                                    style={{fontWeight: 'bold', color: trat.status === 'Iniciado' ? '#004085' : '#155724'}}
+                                <span
                                     title={`Status atual: ${trat.status}`}
                                 >
                                     {trat.status}
@@ -225,7 +270,7 @@ function ListaTratamentos() {
                                 <button 
                                     className="action-button"
                                     title="Ver/Ocultar os procedimentos detalhados deste tratamento."
-                                    onClick={() => toggleDetalhesTratamento(trat.id_tratamento)} 
+                                    onClick={() => toggleDetalhesTratamento(trat)} 
                                 >
                                     <FontAwesomeIcon icon={faEye} /> 
                                 </button>
@@ -251,32 +296,65 @@ function ListaTratamentos() {
                         </tr>
                         
                         {itemExpandidoId === trat.id_tratamento && (
-                            <tr className="tratamento-itens-detalhe">
-                                <td colSpan="6">
-                                    <div style={{padding: '1rem', backgroundColor: '#fdfdfd'}}>
-                                        <h5 style={{marginTop: 0, marginBottom: '0.5rem'}}>Itens do Orçamento (Base):</h5>
-                                        <table style={{width: '100%'}}>
-                                            <thead>
-                                                <tr style={{backgroundColor: '#f9f9f9'}}>
-                                                    <th>Procedimento</th>
-                                                    <th>Dente / Face</th>
-                                                    <th>Valor (R$)</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {trat.orcamento.itens.map(item => (
-                                                    <tr key={item.id_item}>
-                                                    <td>{item.servico_details?.desc_servico || 'Serviço não encontrado'}</td>
-                                                    <td>{`${item.n_dente || '-'}/${item.face || '-'}`}</td>
-                                                    <td>{parseFloat(item.valor || 0).toFixed(2)}</td>
+                                <tr className="tratamento-itens-detalhe">
+                                    <td colSpan="6">
+                                        <div className="detalhe-wrapper">
+                                            <h5 className="detalhe-titulo">Itens do Orçamento:</h5>
+                                            <table className="tabela-itens-interna">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Procedimento</th>
+                                                        <th>Dente / Face</th>
+                                                        <th>Valor (R$)</th>
+                                                        <th>Status</th>
+                                                        <th>Ações</th>
                                                     </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </td>
-                            </tr>
-                    )}
+                                                </thead>
+                                                <tbody>
+                                                    {trat.orcamento.itens.filter(Boolean).map(item => (
+                                                        <tr key={item.id_item}>
+                                                            <td>{item.servico_details?.desc_servico || 'Serviço não encontrado'}</td>
+                                                            <td>{`${item.n_dente || '-'}/${item.face || '-'}`}</td>
+                                                            <td>{parseFloat(item.valor || 0).toFixed(2)}</td>
+                                                            <td>
+                                                                {item.status === 'Realizado' ? (
+                                                                    <span className="status-item-realizado">
+                                                                        Realizado
+                                                                    </span>
+                                                                ) : (
+                                                                    <span className="status-item-pendente">
+                                                                        {item.status}
+                                                                    </span>
+                                                                )}
+                                                            </td>
+                                                            <td>
+                                                                {item.status !== 'Realizado' && (
+                                                                    <button 
+                                                                        className="button-concluir-item"
+                                                                        onClick={() => handleConcluirItem(item.id_item)}
+                                                                        disabled={selectedTratamento.status !== 'Iniciado'}
+                                                                        title={selectedTratamento.status !== 'Iniciado' 
+                                                                            ? 'Você precisa "Iniciar" o tratamento principal primeiro.' 
+                                                                            : 'Marcar este item como concluído'
+                                                                        }
+                                                                    >
+                                                                    Concluir
+                                                                    </button>
+                                                                )}
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                    {(!trat.orcamento.itens || trat.orcamento.itens.filter(Boolean).length === 0) && (
+                                                        <tr>
+                                                            <td colSpan="5" className="no-data-sub-cell">Nenhum item neste orçamento.</td>
+                                                        </tr>
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </td>
+                                </tr>
+                            )}
                     </React.Fragment>
                 ))
                 ) : (
@@ -337,7 +415,7 @@ function ListaTratamentos() {
             }
         >
             <p>Esta tela centraliza todos os tratamentos clínicos em andamento ou concluídos.</p>
-            <ul style={{ paddingLeft: '20px', lineHeight: '1.6' }}>
+            <ul>
             <li>
                 <strong>Visão Geral:</strong> Por padrão, a tabela lista os tratamentos "Em Andamento".
             </li>
@@ -346,7 +424,7 @@ function ListaTratamentos() {
             </li>
             <li>
                 <strong>Ações:</strong>
-                <ul style={{ paddingLeft: '20px', margin: '5px 0' }}>
+                <ul>
                 <li><b>(Olho):</b> Expande a linha para mostrar os itens do orçamento original que deu origem a este tratamento.</li>
                 <li><b>Encerrar:</b> Finaliza um tratamento "Em Andamento" e o move para "Concluído".</li>
                 </ul>

@@ -14,7 +14,7 @@ import Modal from '../componentes/Modal';
 import Select from 'react-select';
 import { useToast } from '../context/ToastContext';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL; 
 const getNomeConsulta = (consulta, pacientes = []) => {
   if (consulta.paciente && typeof consulta.paciente === 'object' && consulta.paciente.nome) {
     return consulta.paciente.nome;
@@ -759,7 +759,8 @@ function Agenda() {
                   >
                     Excluir
                   </button>
-                  <div>
+                  
+                  <div className="button-group-right"> 
                     <button
                       type="button"
                       className="button-secondary"
@@ -772,7 +773,6 @@ function Agenda() {
                       type="button"
                       className="button-primary"
                       onClick={handleSaveStatus}
-                      style={{ marginLeft: '10px' }}
                       title="Salvar o novo status desta consulta"
                     >
                       Salvar

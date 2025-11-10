@@ -17,8 +17,11 @@ const pageTitles = {
     '/patients/:id/edit': 'Editar Paciente', // Adicionada rota de edição
     '/agenda': 'Agenda',
     '/orcamentos': 'Orçamentos',
+    '/tratamentos': 'Tratamentos',
+    '/procedimentos': 'Procedimentos',
     '/pagamentos': 'Pagamentos',
     '/notificacoes': 'Notificações',
+    '/ajuda': 'Ajuda'
 };
 
 function Header() {
