@@ -81,7 +81,7 @@ function App() {
                         <Route path="orcamentos" element={<ListaOrcamentos />} />
                         <Route path="orcamentos/novo" element={<Orcamentos />} />
                         <Route path="tratamentos" element={<ListaTratamentos />} />
-                        <Route path="/procedimentos" element={<Procedimentos />} />
+                        <Route path="procedimentos" element={<Procedimentos />} />
                         <Route path="pagamentos" element={<Pagamentos />} />
                         <Route path="notificacoes" element={<Notificacoes />} />
                         <Route path="ajuda" element={<AjudaGeral />} />
